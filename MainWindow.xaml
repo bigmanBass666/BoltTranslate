@@ -1,12 +1,12 @@
-﻿<Window x:Class="TranslateSharp.MainWindow"
+<Window x:Class="TranslateSharp.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:TranslateSharp"
-        mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
-    <Grid>
-
-    </Grid>
+        Title="TranslateSharp" Height="0" Width="0"
+        WindowStyle="None"
+        AllowsTransparency="True"
+        Background="Transparent"
+        ShowInTaskbar="False"
+        WindowStartupLocation="CenterScreen"
+        Loaded="OnLoaded"
+        StateChanged="OnStateChanged">
 </Window>

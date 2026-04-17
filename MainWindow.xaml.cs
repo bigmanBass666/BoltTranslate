@@ -1,23 +1,123 @@
-﻿using System.Text;
+using System.Drawing;
+using System.Drawing.Drawing2D;
+using System.IO;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
+using System.Windows.Forms;
+using TranslateSharp.Config;
+using TranslateSharp.Services;
 
 namespace TranslateSharp;
 
-/// <summary>
-/// Interaction logic for MainWindow.xaml
-/// </summary>
 public partial class MainWindow : Window
 {
-    public MainWindow()
+    private readonly AppConfig _config;
+    private ITranslationService? _translationService;
+    private IWindowManager? _windowManager;
+    private ISelectionService? _selectionService;
+    private NotifyIcon? _trayIcon;
+
+    public MainWindow(AppConfig config)
     {
+        _config = config;
         InitializeComponent();
+    }
+
+    public void SetServices(ITranslationService translationService, IWindowManager windowManager, ISelectionService selectionService)
+    {
+        _translationService = translationService;
+        _windowManager = windowManager;
+        _selectionService = selectionService;
+    }
+
+    private void OnLoaded(object sender, RoutedEventArgs e)
+    {
+        CreateTrayIcon();
+        HideToTray();
+    }
+
+    private void OnStateChanged(object sender, EventArgs e)
+    {
+        if (WindowState == WindowState.Minimized)
+            HideToTray();
+    }
+
+    private void CreateTrayIcon()
+    {
+        _trayIcon = new NotifyIcon
+        {
+            Icon = CreateIcon(),
+            Visible = true,
+            Text = $"TranslateSharp  |  快捷键: {_config.HotkeyModifiers}+{_config.HotkeyKey}"
+        };
+
+        var menu = new ContextMenuStrip();
+        
+        var statusItem = new ToolStripMenuItem($"快捷键: {_config.HotkeyModifiers}+{_config.HotkeyKey}");
+        statusItem.Enabled = false;
+        menu.Items.Add(statusItem);
+        menu.Items.Add(new ToolStripSeparator());
+        
+        var openConfigItem = new ToolStripMenuItem("打开配置文件", null, (_, _) => OpenConfigFile());
+        menu.Items.Add(openConfigItem);
+
+        var exitItem = new ToolStripMenuItem("退出", null, (_, _) => ExitApplication());
+        menu.Items.Add(exitItem);
+
+        _trayIcon.ContextMenuStrip = menu;
+        _trayIcon.DoubleClick += (_, _) => ShowStatusBalloon();
+    }
+
+    private static Icon CreateIcon()
+    {
+        using var bmp = new Bitmap(64, 64);
+        using var g = Graphics.FromImage(bmp);
+        g.Clear(Color.Transparent);
+        g.SmoothingMode = SmoothingMode.AntiAlias;
+
+        using var brush = new SolidBrush(Color.FromArgb(0, 122, 204));
+        g.FillEllipse(brush, 4, 4, 56, 56);
+
+        using var pen = new Pen(Color.White, 3) { LineJoin = LineJoin.Round };
+        g.DrawLines(pen, new[]
+        {
+            new PointF(20, 24), new PointF(28, 34), new PointF(44, 18)
+        });
+
+        return System.Drawing.Icon.FromHandle(bmp.GetHicon());
+    }
+
+    private void HideToTray()
+    {
+        Visibility = Visibility.Hidden;
+        ShowInTaskbar = false;
+    }
+
+    private void ShowStatusBalloon()
+    {
+        _trayIcon?.ShowBalloonTip(
+            2000,
+            "TranslateSharp",
+            $"运行中...  快捷键: {_config.HotkeyModifiers}+{_config.HotkeyKey}",
+            ToolTipIcon.Info);
+    }
+
+    private void OpenConfigFile()
+    {
+        var path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "config.json");
+        if (!File.Exists(path))
+            ConfigManager.Save(_config);
+            
+        using var proc = System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
+        {
+            FileName = "notepad.exe",
+            Arguments = $"\"{path}\"",
+            UseShellExecute = true
+        });
+    }
+
+    private void ExitApplication()
+    {
+        _trayIcon?.Dispose();
+        System.Windows.Application.Current.Shutdown();
     }
 }
