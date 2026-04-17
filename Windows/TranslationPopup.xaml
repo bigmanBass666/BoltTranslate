@@ -8,33 +8,25 @@
         Topmost="True"
         ShowInTaskbar="False"
         ResizeMode="NoResize"
-        MouseLeftButtonDown="OnMouseLeftButtonDown"
         Deactivated="OnDeactivated"
-        KeyDown="OnKeyDown">
-    <Border CornerRadius="12" Background="#F0FFFFFF" BorderBrush="#1A000000" BorderThickness="1">
+        KeyDown="OnKeyDown"
+        MouseLeftButtonDown="OnMouseLeftButtonDown">
+    <Border x:Name="PopupBorder" CornerRadius="12" Background="#F0FFFFFF" BorderBrush="#1A000000" BorderThickness="1">
         <Border.Effect>
             <DropShadowEffect BlurRadius="20" ShadowDepth="4" Opacity="0.25" Color="Black"/>
         </Border.Effect>
-        <StackPanel Margin="16,14,16,14">
-            <TextBlock Text="原文" Foreground="#999999" FontSize="11" FontFamily="Microsoft YaHei UI" Margin="0,0,0,4"/>
-            <TextBlock x:Name="OriginalTextBlock" 
-                       TextWrapping="Wrap" 
-                       MaxHeight="120"
-                       TextTrimming="CharacterEllipsis"
-                       Foreground="#333333" 
-                       FontSize="13" 
-                       FontFamily="Microsoft YaHei UI"
-                       Margin="0,0,0,10"/>
-            <Separator Background="#E0E0E0" Margin="0,0,0,10"/>
-            <TextBlock Text="译文" Foreground="#999999" FontSize="11" FontFamily="Microsoft YaHei UI" Margin="0,0,0,4"/>
-            <TextBlock x:Name="TranslatedTextBlock" 
-                       TextWrapping="Wrap" 
-                       MaxHeight="300"
-                       TextTrimming="CharacterEllipsis"
-                       Foreground="#1A1A1A" 
-                       FontSize="14" 
-                       FontWeight="SemiBold"
-                       FontFamily="Microsoft YaHei UI"/>
-        </StackPanel>
+        <TextBox x:Name="TranslatedTextBox"
+                 TextWrapping="Wrap"
+                 MaxWidth="390"
+                 MaxHeight="400"
+                 IsReadOnly="True"
+                 BorderThickness="0"
+                 Background="Transparent"
+                 Foreground="#1A1A1A"
+                 FontSize="14"
+                 FontFamily="Microsoft YaHei UI"
+                 VerticalScrollBarVisibility="Auto"
+                 Padding="16,14,16,14"
+                 Cursor="Arrow"/>
     </Border>
 </Window>

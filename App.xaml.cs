@@ -62,7 +62,7 @@ public partial class App : System.Windows.Application
     private void InitServices()
     {
         _translationService = new TranslationService();
-        _translationService.Configure(_config.ApiUrl, _config.ApiKey, _config.Model);
+        _translationService.Configure(_config.ApiUrl, _config.ApiKey, _config.Model, _config.ProxyUrl);
 
         _windowManager = new WindowManager();
 
@@ -85,17 +85,17 @@ public partial class App : System.Windows.Application
 
         try
         {
-            _windowManager.ShowPopup(text, "翻译中...");
+            _windowManager.ShowPopup("翻译中...");
             var result = await _translationService.TranslateAsync(text);
-            _windowManager.ShowPopup(text, result);
+            _windowManager.ShowPopup(result);
         }
         catch (TranslationException ex)
         {
-            _windowManager?.ShowPopup(text, $"❌ 翻译失败: {ex.Message}");
+            _windowManager?.ShowPopup($"❌ 翻译失败: {ex.Message}");
         }
         catch (Exception ex)
         {
-            _windowManager?.ShowPopup(text, $"❌ 错误: {ex.Message}");
+            _windowManager?.ShowPopup($"❌ 错误: {ex.Message}");
         }
     }
 

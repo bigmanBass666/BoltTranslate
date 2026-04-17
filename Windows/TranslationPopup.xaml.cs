@@ -10,26 +10,30 @@ public partial class TranslationPopup : Window
     {
         InitializeComponent();
         SourceInitialized += OnSourceInitialized;
+        TranslatedTextBox.PreviewMouseLeftButtonDown += OnTextBoxMouseDown;
     }
 
     private void OnSourceInitialized(object? sender, EventArgs e)
     {
         var hwnd = new WindowInteropHelper(this).Handle;
-        WindowsServices.SetWindowExStyle(hwnd,
-            WindowsServices.WS_EX_TOOLWINDOW | WindowsServices.WS_EX_NOACTIVATE);
+        WindowsServices.SetWindowExStyle(hwnd, WindowsServices.WS_EX_TOOLWINDOW);
     }
 
-    public void SetContent(string original, string translated)
+    public void SetContent(string translatedText)
     {
-        OriginalTextBlock.Text = original;
-        TranslatedTextBlock.Text = translated;
+        TranslatedTextBox.Text = translatedText;
         SizeToContent = SizeToContent.WidthAndHeight;
+    }
+
+    private void OnTextBoxMouseDown(object sender, MouseButtonEventArgs e)
+    {
+        if (e.ClickCount == 1)
+            DragMove();
     }
 
     private void OnMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
     {
-        if (e.ClickCount == 1)
-            DragMove();
+        DragMove();
     }
 
     private void OnDeactivated(object? sender, EventArgs e)
@@ -47,7 +51,6 @@ public partial class TranslationPopup : Window
 internal static class WindowsServices
 {
     internal const int WS_EX_TOOLWINDOW = 0x00000080;
-    internal const int WS_EX_NOACTIVATE = 0x08000000;
     internal const int GWL_EXSTYLE = -20;
 
     [System.Runtime.InteropServices.DllImport("user32.dll")]

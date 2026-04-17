@@ -5,7 +5,7 @@ namespace TranslateSharp.Services;
 
 public interface IWindowManager
 {
-    void ShowPopup(string originalText, string translatedText);
+    void ShowPopup(string translatedText);
     void HidePopup();
     bool IsVisible { get; }
 }
@@ -14,7 +14,7 @@ public class WindowManager : IWindowManager
 {
     private readonly TranslationPopup _popup;
     private static readonly double MaxWidth = 420;
-    private static readonly double MaxHeight = 500;
+    private static readonly double MaxHeight = 450;
 
     public WindowManager()
     {
@@ -23,9 +23,9 @@ public class WindowManager : IWindowManager
 
     public bool IsVisible => _popup.IsVisible;
 
-    public void ShowPopup(string originalText, string translatedText)
+    public void ShowPopup(string translatedText)
     {
-        _popup.SetContent(originalText, translatedText);
+        _popup.SetContent(translatedText);
         
         var pos = CalculatePosition();
         _popup.Left = pos.X;
@@ -33,6 +33,7 @@ public class WindowManager : IWindowManager
         _popup.MaxWidth = MaxWidth;
         _popup.MaxHeight = MaxHeight;
         _popup.Show();
+        _popup.Activate();
     }
 
     public void HidePopup()

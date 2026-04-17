@@ -9,6 +9,7 @@ public class AppConfig
     public string ApiUrl { get; set; } = "https://api.openai.com/v1/chat/completions";
     public string ApiKey { get; set; } = "";
     public string Model { get; set; } = "gpt-4o-mini";
+    public string ProxyUrl { get; set; } = "";
     public string HotkeyModifiers { get; set; } = "Ctrl+Shift";
     public string HotkeyKey { get; set; } = "T";
 }

@@ -1,3 +1,4 @@
+using System.Net;
 using System.Net.Http;
 using System.Text;
 using System.Text.Json;
@@ -8,7 +9,7 @@ namespace TranslateSharp.Services;
 public interface ITranslationService
 {
     Task<string> TranslateAsync(string text, CancellationToken ct = default);
-    void Configure(string apiUrl, string apiKey, string model);
+    void Configure(string apiUrl, string apiKey, string model, string proxyUrl = "");
     bool IsConfigured { get; }
 }
 
@@ -17,24 +18,61 @@ public class TranslationService : ITranslationService
     private string? _apiUrl;
     private string? _apiKey;
     private string _model = "gpt-4o-mini";
-    private static readonly HttpClient Client = new()
-    {
-        Timeout = TimeSpan.FromSeconds(15)
-    };
+    private HttpClient? _client;
+    private static readonly TimeSpan Timeout = TimeSpan.FromSeconds(30);
 
     public bool IsConfigured => !string.IsNullOrEmpty(_apiUrl) && !string.IsNullOrEmpty(_apiKey);
 
-    public void Configure(string apiUrl, string apiKey, string model)
+    public void Configure(string apiUrl, string apiKey, string model, string proxyUrl = "")
     {
-        _apiUrl = apiUrl.TrimEnd('/');
+        var handler = new SocketsHttpHandler
+        {
+            ConnectTimeout = Timeout,
+            PooledConnectionLifetime = TimeSpan.FromMinutes(5)
+        };
+
+        if (!string.IsNullOrWhiteSpace(proxyUrl))
+        {
+            try
+            {
+                handler.Proxy = new WebProxy(proxyUrl);
+                handler.UseProxy = true;
+            }
+            catch (Exception ex)
+            {
+                throw new InvalidOperationException($"代理地址无效: {proxyUrl} - {ex.Message}");
+            }
+        }
+
+        _client = new HttpClient(handler)
+        {
+            Timeout = Timeout
+        };
+        
+        _apiUrl = BuildApiUrl(apiUrl);
         _apiKey = apiKey;
         _model = model;
     }
 
+    private static string BuildApiUrl(string url)
+    {
+        var trimmed = url.TrimEnd('/');
+        if (trimmed.EndsWith("/chat/completions", StringComparison.OrdinalIgnoreCase))
+            return trimmed;
+        if (trimmed.EndsWith("/v1", StringComparison.OrdinalIgnoreCase) ||
+            trimmed.EndsWith("/v4", StringComparison.OrdinalIgnoreCase) ||
+            trimmed.EndsWith("/paas/v4", StringComparison.OrdinalIgnoreCase))
+            return trimmed + "/chat/completions";
+        return trimmed + "/chat/completions";
+    }
+
     public async Task<string> TranslateAsync(string text, CancellationToken ct = default)
     {
-        if (!IsConfigured)
+        if (!IsConfigured || _client == null)
             throw new InvalidOperationException("API 未配置，请先在 config.json 中设置 ApiUrl 和 ApiKey");
+
+        if (string.IsNullOrWhiteSpace(text))
+            return "";
 
         var requestBody = new
         {
@@ -49,7 +87,7 @@ public class TranslationService : ITranslationService
         };
 
         var json = JsonSerializer.Serialize(requestBody);
-        using var request = new HttpRequestMessage(HttpMethod.Post, _apiUrl + "/chat/completions")
+        using var request = new HttpRequestMessage(HttpMethod.Post, _apiUrl)
         {
             Content = new StringContent(json, Encoding.UTF8, "application/json")
         };
@@ -57,10 +95,16 @@ public class TranslationService : ITranslationService
 
         try
         {
-            using var response = await Client.SendAsync(request, ct);
-            response.EnsureSuccessStatusCode();
+            using var response = await _client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, ct);
 
             var responseBody = await response.Content.ReadAsStringAsync(ct);
+
+            if (!response.IsSuccessStatusCode)
+            {
+                var errorMsg = ParseErrorResponse(responseBody, response.StatusCode);
+                throw new TranslationException($"API 错误 ({(int)response.StatusCode}): {errorMsg}");
+            }
+
             using var doc = JsonDocument.Parse(responseBody);
 
             return doc.RootElement
@@ -72,16 +116,40 @@ public class TranslationService : ITranslationService
         }
         catch (HttpRequestException ex)
         {
-            throw new TranslationException($"请求失败: {ex.Message}", ex);
+            throw new TranslationException($"网络请求失败: {ex.Message}\n\n可能原因:\n- 网络未连接\n- API 地址错误\n- 需要配置代理 (ProxyUrl)", ex);
         }
-        catch (TaskCanceledException)
+        catch (TaskCanceledException) when (!ct.IsCancellationRequested)
         {
-            throw new TranslationException("请求超时，请检查网络连接");
+            throw new TranslationException("请求超时 (30秒)。请检查网络连接或配置代理");
         }
-        catch (KeyNotFoundException ex)
+        catch (OperationCanceledException)
         {
-            throw new TranslationException($"API 返回格式异常: {ex.Message}", ex);
+            throw new TranslationException("请求已取消");
         }
+        catch (JsonException ex)
+        {
+            throw new TranslationException($"API 返回数据解析失败，可能是返回格式不兼容: {ex.Message}", ex);
+        }
+    }
+
+    private static string ParseErrorResponse(string body, HttpStatusCode statusCode)
+    {
+        try
+        {
+            using var doc = JsonDocument.Parse(body);
+            if (doc.RootElement.TryGetProperty("error", out var error))
+            {
+                var message = error.GetProperty("message").GetString();
+                var code = error.TryGetProperty("code", out var c) ? c.GetString() : "";
+                return !string.IsNullOrWhiteSpace(code) ? $"[{code}] {message}" : message ?? body;
+            }
+        }
+        catch { }
+
+        if (body.Length > 300)
+            return body[..300] + "...";
+
+        return body;
     }
 }
 
