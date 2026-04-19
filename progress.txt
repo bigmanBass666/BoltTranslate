@@ -32,6 +32,13 @@
   - 删除 CalculatePosition 等复杂坐标计算，仅保留基本边界检测
   - SelectionService 使用 GetPhysicalCursorPos 获取物理坐标
   - 编译 0 错误 0 警告
+
+- **快捷键配置兼容性验证**：
+  - 验证 SelectionService/MainWindow/HotkeyService 三处全部使用 EffectiveHotkey
+  - 更新 publish/config.json 的 ApiKey 为用户实际值
+  - 确认 Hotkey 字段为新格式 "Ctrl+Shift+T"
+  - 重新 dotnet publish 并启动应用供用户测试
+  - 全部 checklist 验证通过
 - **常量类提取（代码质量优化）**：
   - 创建 Services/AppConstants.cs 统一管理所有魔法数字和硬编码字符串
   - 包含：弹窗定位参数、热键冷却时间、剪贴板操作延迟/超时、翻译 API 参数和提示词
