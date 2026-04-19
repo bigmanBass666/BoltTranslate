@@ -19,6 +19,8 @@ public class WindowManager : IWindowManager
     private readonly TranslationPopup _popup;
     private const double PopupWidth = 400;
     private const double PopupMaxHeight = 450;
+    private const int OffsetX = 20;
+    private const int OffsetY = 20;
     private (double X, double Y) _popupPos = (100, 100);
 
     [DllImport("user32.dll", SetLastError = true)]
@@ -52,8 +54,20 @@ public class WindowManager : IWindowManager
         _popup.Show();
 
         var hwnd = new WindowInteropHelper(_popup).Handle;
-        var (physicalX, physicalY) = CalculatePosition(_popupPos.X, _popupPos.Y);
-        SetWindowPos(hwnd, HWND_TOPMOST, physicalX, physicalY, 0, 0, SWP_NOSIZE | SWP_NOZORDER | SWP_NOACTIVATE);
+        var x = (int)_popupPos.X + OffsetX;
+        var y = (int)_popupPos.Y + OffsetY;
+
+        var screenWidth = GetSystemMetrics(SM_CXSCREEN);
+        var screenHeight = GetSystemMetrics(SM_CYSCREEN);
+
+        if (x + PopupWidth > screenWidth)
+            x = screenWidth - (int)PopupWidth - 10;
+        if (y + PopupMaxHeight > screenHeight)
+            y = (int)_popupPos.Y - (int)PopupMaxHeight - 10;
+        if (x < 0) x = 8;
+        if (y < 0) y = 8;
+
+        SetWindowPos(hwnd, HWND_TOPMOST, x, y, 0, 0, SWP_NOSIZE | SWP_NOZORDER | SWP_NOACTIVATE);
         _popup.Activate();
     }
 
@@ -66,14 +80,6 @@ public class WindowManager : IWindowManager
     public void ShowPopupAtSelection(string translatedText, double cursorX, double cursorY)
     {
         _popupPos = (cursorX, cursorY);
-
-        var selectionBounds = UiaSelectionService.GetLastSelectionBounds();
-        if (selectionBounds.HasValue)
-        {
-            var (left, top, right, bottom) = selectionBounds.Value;
-            _popupPos = ((left + right) / 2, bottom + 5);
-        }
-
         ShowPopup(translatedText);
     }
 
@@ -81,30 +87,4 @@ public class WindowManager : IWindowManager
     {
         _popup.Hide();
     }
-
-    private (int X, int Y) CalculatePosition(double physicalCx, double physicalCy)
-    {
-        var screenWidth = GetSystemMetrics(SM_CXSCREEN);
-        var screenHeight = GetSystemMetrics(SM_CYSCREEN);
-
-        var popupWidth = (int)_popup.ActualWidth;
-        var popupHeight = (int)_popup.ActualHeight;
-        if (popupWidth <= 0) popupWidth = 400;
-        if (popupHeight <= 0) popupHeight = 450;
-
-        var x = (int)(physicalCx - popupWidth / 2);
-        var y = (int)(physicalCy + 5);
-
-        if (x + popupWidth > screenWidth)
-            x = screenWidth - popupWidth - 10;
-        if (x < 0) x = 8;
-        if (y + popupHeight > screenHeight)
-            y = (int)(physicalCy - popupHeight - 10);
-        if (y < 0) y = 8;
-
-        return (x, y);
-    }
-
-    [StructLayout(LayoutKind.Sequential)]
-    private struct tagPOINT { public int X; public int Y; }
 }
