@@ -73,5 +73,17 @@
 - [ ] 开机自启动
 - [ ] 翻译历史记录
 - [ ] 多语言互译
-- [ ] 自定义快捷键配置化
+- [ ] 自定义快捷键配置化（config.json 已支持 Hotkey 字段）
 - [ ] 深色模式支持
+
+## 2026-04-20
+
+### 已完成
+
+- **向后兼容 — 旧 config.json 格式自动升级**：
+  - AppConfig.cs 新增 EffectiveHotkey 计算属性，优先读 Hotkey，降级读 HotkeyModifiers+HotkeyKey
+  - Load() 自动迁移：检测旧格式时合并写入 Hotkey 并保存
+  - MainWindow.xaml.cs 3处 _config.Hotkey → _config.EffectiveHotkey
+  - HotkeyService.cs / SelectionService.cs 构造函数改用 config.EffectiveHotkey
+  - 修复 AppConfig.Load() 中局部变量名冲突（config → defaultConfig）
+  - 编译 0 错误 0 警告
