@@ -26,12 +26,13 @@
 
 ### 已完成
 
-- **窗口定位逻辑重写（WindowManager.cs）**：
+- **悬浮窗定位重写（SetWindowPos 覆盖方案）**：
   - Show() 后立即用 Win32 SetWindowPos() 覆盖位置，全程使用物理像素坐标系
   - 新增 P/Invoke：SetWindowPos、LogicalToPhysicalPoint、GetSystemMetrics
-  - 新增 CalculatePositionInPhysical 方法：逻辑坐标→物理坐标转换 + 边界检测
-  - 使用 _popup.ActualWidth/ActualHeight 获取实际渲染尺寸做边界检测
-  - ShowPopupAtSelection 保持 UIA 物理坐标→逻辑坐标统一转换流程
+  - CalculatePositionInPhysical：逻辑坐标→物理坐标转换 + 边界检测
+  - 使用 _popup.ActualWidth/ActualHeight 获取实际渲染尺寸
+  - UIA 坐标通过 PhysicalToLogicalPoint 转换后统一走 ShowPopup 流程
+  - 编译 0 错误 0 警告
 
 ### 待改进 / Bug
 
