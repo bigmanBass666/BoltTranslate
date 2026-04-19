@@ -33,6 +33,10 @@
   - SelectionService 使用 GetPhysicalCursorPos 获取物理坐标
   - 编译 0 错误 0 警告
 
+- **配置文件格式化**：
+  - publish/config.json 从单行压缩改为多行缩进格式
+  - 提升纯小白用户的可读性和编辑体验
+  - ConfigManager.Save() 的 WriteIndented=true 确保后续自动保存也是格式化的
 - **快捷键配置兼容性验证**：
   - 验证 SelectionService/MainWindow/HotkeyService 三处全部使用 EffectiveHotkey
   - 更新 publish/config.json 的 ApiKey 为用户实际值

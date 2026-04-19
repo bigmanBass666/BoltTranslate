@@ -1,6 +1,7 @@
 using System.IO;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using TranslateSharp.Services;
 
 namespace TranslateSharp.Config;
 
@@ -64,6 +65,13 @@ public static class ConfigManager
         if (NeedsMigration(config))
         {
             config.Hotkey = config.EffectiveHotkey;
+            Save(config);
+        }
+
+        var normalized = HotkeyParser.NormalizeHotkey(config.EffectiveHotkey);
+        if (config.Hotkey != normalized)
+        {
+            config.Hotkey = normalized;
             Save(config);
         }
 

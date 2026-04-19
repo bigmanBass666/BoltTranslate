@@ -61,7 +61,7 @@ public class SelectionService : ISelectionService, IDisposable
         _hwndSource = HwndSource.FromHwnd(_hwnd);
         _hwndSource?.AddHook(WndProc);
 
-        var (modifiers, vk) = ParseHotkey(_hotkeyString);
+        var (modifiers, vk, _) = HotkeyParser.Parse(_hotkeyString);
         if (!Win32Api.RegisterHotKey(_hwnd, _hotKeyId, modifiers, vk))
             throw new InvalidOperationException(
                 $"快捷键注册失败: {_hotkeyString}。可能已被其他软件占用");
@@ -94,48 +94,6 @@ public class SelectionService : ISelectionService, IDisposable
         catch
         {
         }
-    }
-
-    private static (uint Modifiers, byte Vk) ParseHotkey(string hotkey)
-    {
-        uint modifiers = 0;
-        byte vk = 0;
-        var parts = hotkey.Split('+', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries);
-
-        for (int i = 0; i < parts.Length; i++)
-        {
-            var part = parts[i].ToUpperInvariant();
-            if (i < parts.Length - 1)
-            {
-                switch (part)
-                {
-                    case "CTRL": case "CONTROL": modifiers |= Win32Api.MOD_CONTROL; break;
-                    case "SHIFT": modifiers |= Win32Api.MOD_SHIFT; break;
-                    case "ALT": modifiers |= Win32Api.MOD_ALT; break;
-                    case "WIN": case "SUPER": modifiers |= Win32Api.MOD_WIN; break;
-                }
-            }
-            else
-            {
-                vk = part.Length == 1 ? (byte)char.ToUpperInvariant(part[0]) : ParseVkByName(part);
-            }
-        }
-        return (modifiers, vk > 0 ? vk : (byte)0x54);
-    }
-
-    private static byte ParseVkByName(string name)
-    {
-        return name.ToUpperInvariant() switch
-        {
-            "F1" => 0x70, "F2" => 0x71, "F3" => 0x72, "F4" => 0x73,
-            "F5" => 0x74, "F6" => 0x75, "F7" => 0x76, "F8" => 0x77,
-            "F9" => 0x78, "F10" => 0x79, "F11" => 0x7A, "F12" => 0x7B,
-            "SPACE" => 0x20, "TAB" => 0x09, "ENTER" => 0x0D, "ESC" => 0x1B,
-            "BACKSPACE" => 0x08, "DELETE" => 0x2E, "INSERT" => 0x2D,
-            "HOME" => 0x24, "END" => 0x23, "PGUP" => 0x21, "PGDN" => 0x22,
-            "LEFT" => 0x25, "UP" => 0x26, "RIGHT" => 0x27, "DOWN" => 0x28,
-            _ => (byte)char.ToUpperInvariant(name[0])
-        };
     }
 
     public void Dispose()
