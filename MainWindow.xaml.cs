@@ -105,13 +105,23 @@ public partial class MainWindow : Window
         var path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "config.json");
         if (!File.Exists(path))
             ConfigManager.Save(_config);
-            
+
+        var contentBefore = File.Exists(path) ? File.ReadAllText(path) : "";
+
         using var proc = System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
         {
             FileName = "notepad.exe",
             Arguments = $"\"{path}\"",
             UseShellExecute = true
         });
+
+        if (proc != null)
+        {
+            proc.WaitForExit();
+            var contentAfter = File.Exists(path) ? File.ReadAllText(path) : "";
+            if (contentAfter != contentBefore)
+                RestartApplication();
+        }
     }
 
     private void ExitApplication()
