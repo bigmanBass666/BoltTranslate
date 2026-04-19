@@ -3,14 +3,31 @@ using TranslateSharp.Services.NativeInterop;
 
 namespace TranslateSharp.Services;
 
-internal static class UiaSelectionService
+public interface ITextSelectionService
 {
-    private static (double Left, double Top, double Right, double Bottom)? _lastSelectionBounds;
+    string? GetSelectedText();
+}
 
-    public static string? TryGetSelectedText()
+public class TextSelectionService : ITextSelectionService
+{
+    private readonly IClipboardService _clipboardService;
+
+    public TextSelectionService(IClipboardService clipboardService)
     {
-        _lastSelectionBounds = null;
+        _clipboardService = clipboardService;
+    }
 
+    public string? GetSelectedText()
+    {
+        var uiaText = TryGetSelectedTextViaUIA();
+        if (!string.IsNullOrEmpty(uiaText))
+            return uiaText;
+
+        return _clipboardService.GetSelectedTextViaClipboard();
+    }
+
+    private static string? TryGetSelectedTextViaUIA()
+    {
         try
         {
             var hr = UiaNative.CoInitialize(IntPtr.Zero);
@@ -47,8 +64,6 @@ internal static class UiaSelectionService
                 if (hr != 0 || ranges == null || ranges.Length == 0) { Marshal.Release(pPattern); Marshal.Release(pElement); Marshal.Release(pAutomation); return null; }
 
                 var result = new System.Text.StringBuilder();
-                double minLeft = double.MaxValue, minTop = double.MaxValue;
-                double maxRight = double.MinValue, maxBottom = double.MinValue;
 
                 foreach (var pRange in ranges)
                 {
@@ -61,28 +76,8 @@ internal static class UiaSelectionService
                     if (hr == 0 && !string.IsNullOrEmpty(text))
                         result.Append(text);
 
-                    double[]? boundingRects = null;
-                    try
-                    {
-                        hr = range.GetBoundingRectangles(out boundingRects);
-                        if (hr == 0 && boundingRects != null && boundingRects.Length >= 4)
-                        {
-                            for (int i = 0; i + 3 < boundingRects.Length; i += 4)
-                            {
-                                if (boundingRects[i] < minLeft) minLeft = boundingRects[i];
-                                if (boundingRects[i + 1] < minTop) minTop = boundingRects[i + 1];
-                                if (boundingRects[i] + boundingRects[i + 2] > maxRight) maxRight = boundingRects[i] + boundingRects[i + 2];
-                                if (boundingRects[i + 1] + boundingRects[i + 3] > maxBottom) maxBottom = boundingRects[i + 1] + boundingRects[i + 3];
-                            }
-                        }
-                    }
-                    catch { }
-
                     Marshal.Release(pRange);
                 }
-
-                if (minLeft < double.MaxValue)
-                    _lastSelectionBounds = (minLeft, minTop, maxRight, maxBottom);
 
                 Marshal.Release(pPattern);
                 Marshal.Release(pElement);
@@ -101,10 +96,5 @@ internal static class UiaSelectionService
         {
             return null;
         }
-    }
-
-    public static (double Left, double Top, double Right, double Bottom)? GetLastSelectionBounds()
-    {
-        return _lastSelectionBounds;
     }
 }

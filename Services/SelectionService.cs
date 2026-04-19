@@ -1,7 +1,5 @@
 using System.Runtime.InteropServices;
 using System.Windows;
-using System.Windows.Forms;
-using System.Windows.Input;
 using System.Windows.Interop;
 
 namespace TranslateSharp.Services;
@@ -16,12 +14,18 @@ public interface ISelectionService
 public class SelectionService : ISelectionService, IDisposable
 {
     private Action<string, double, double>? _onTranslateRequested;
+    private readonly ITextSelectionService _textSelectionService;
     private IntPtr _hwnd;
     private HwndSource? _hwndSource;
     private int _hotKeyId = 0x9001;
     private bool _isRunning;
     private DateTime _lastTriggerTime = DateTime.MinValue;
     private static readonly TimeSpan Cooldown = TimeSpan.FromMilliseconds(500);
+
+    public SelectionService(ITextSelectionService textSelectionService)
+    {
+        _textSelectionService = textSelectionService;
+    }
 
     public void RegisterHotkey(Action<string, double, double> onTranslateRequested)
     {
@@ -102,92 +106,9 @@ public class SelectionService : ISelectionService, IDisposable
         }
     }
 
-    private static string GetSelectedText()
+    private string GetSelectedText()
     {
-        var uiaText = UiaSelectionService.TryGetSelectedText();
-        if (!string.IsNullOrEmpty(uiaText))
-            return uiaText;
-
-        return GetSelectedTextViaClipboard();
-    }
-
-    private static string GetSelectedTextViaClipboard()
-    {
-        string savedText = "";
-        string selectedText = "";
-
-        var clipboardOp = new Thread(() =>
-        {
-            var seqBefore = GetClipboardSequenceNumber();
-
-            try { savedText = System.Windows.Forms.Clipboard.GetText(); } catch { }
-
-            var foregroundWnd = GetForegroundWindow();
-
-            Thread.Sleep(50);
-            keybd_event(VK_CONTROL, 0, KEYEVENTF_KEYUP, 0);
-            keybd_event(VK_SHIFT, 0, KEYEVENTF_KEYUP, 0);
-            keybd_event(VK_MENU, 0, KEYEVENTF_KEYUP, 0);
-            Thread.Sleep(30);
-
-            keybd_event(VK_CONTROL, 0, 0, 0);
-            keybd_event(0x43, 0, 0, 0);
-            keybd_event(0x43, 0, KEYEVENTF_KEYUP, 0);
-            keybd_event(VK_CONTROL, 0, KEYEVENTF_KEYUP, 0);
-
-            for (int i = 0; i < 10; i++)
-            {
-                Thread.Sleep(50);
-                var seqAfter = GetClipboardSequenceNumber();
-                if (seqAfter != seqBefore)
-                    break;
-            }
-
-            try { selectedText = System.Windows.Forms.Clipboard.GetText(); } catch { }
-
-            var seqFinal = GetClipboardSequenceNumber();
-            if (seqFinal == seqBefore)
-            {
-                selectedText = "";
-                SetForegroundWindow(foregroundWnd);
-                return;
-            }
-
-            if (selectedText == savedText)
-            {
-                selectedText = "";
-                RestoreClipboard(savedText);
-                SetForegroundWindow(foregroundWnd);
-                return;
-            }
-
-            RestoreClipboard(savedText);
-            SetForegroundWindow(foregroundWnd);
-        });
-        clipboardOp.SetApartmentState(ApartmentState.STA);
-        clipboardOp.Start();
-        clipboardOp.Join(8000);
-
-        return selectedText;
-    }
-
-    private static void RestoreClipboard(string text)
-    {
-        for (int i = 0; i < 5; i++)
-        {
-            try
-            {
-                if (string.IsNullOrEmpty(text))
-                    System.Windows.Forms.Clipboard.Clear();
-                else
-                    System.Windows.Forms.Clipboard.SetText(text);
-                return;
-            }
-            catch
-            {
-                Thread.Sleep(100);
-            }
-        }
+        return _textSelectionService.GetSelectedText() ?? "";
     }
 
     #region Win32 API
@@ -196,29 +117,12 @@ public class SelectionService : ISelectionService, IDisposable
     private const uint MOD_CONTROL = 0x0002;
     private const uint MOD_SHIFT = 0x0004;
     private const uint MOD_WIN = 0x0008;
-    private const uint KEYEVENTF_KEYUP = 0x0002;
-    private const byte VK_CONTROL = 0x11;
-    private const byte VK_C = 0x43;
-    private const byte VK_SHIFT = 0x10;
-    private const byte VK_MENU = 0x12;
 
     [DllImport("user32.dll", SetLastError = true)]
     private static extern bool RegisterHotKey(IntPtr hWnd, int id, uint fsModifiers, uint vk);
 
     [DllImport("user32.dll", SetLastError = true)]
     private static extern bool UnregisterHotKey(IntPtr hWnd, int id);
-
-    [DllImport("user32.dll")]
-    private static extern IntPtr GetForegroundWindow();
-
-    [DllImport("user32.dll")]
-    private static extern void keybd_event(byte bVk, byte bScan, uint dwFlags, uint dwExtraInfo);
-
-    [DllImport("user32.dll")]
-    private static extern bool SetForegroundWindow(IntPtr hWnd);
-
-    [DllImport("user32.dll")]
-    private static extern uint GetClipboardSequenceNumber();
 
     [DllImport("user32.dll")]
     private static extern bool GetPhysicalCursorPos(out POINT lpPoint);

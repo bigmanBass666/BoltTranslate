@@ -14,12 +14,18 @@ public interface IHotkeyService
 public class HotkeyService : IHotkeyService, IDisposable
 {
     private Action<string>? _onHotkeyPressed;
+    private readonly ITextSelectionService _textSelectionService;
     private IntPtr _hwnd;
     private HwndSource? _hwndSource;
     private readonly int _hotKeyId = 0x9001;
     private bool _isRunning;
     private DateTime _lastTriggerTime = DateTime.MinValue;
     private static readonly TimeSpan Cooldown = TimeSpan.FromMilliseconds(500);
+
+    public HotkeyService(ITextSelectionService textSelectionService)
+    {
+        _textSelectionService = textSelectionService;
+    }
 
     public void RegisterHotkey(Action<string> onHotkeyPressed)
     {
@@ -81,7 +87,7 @@ public class HotkeyService : IHotkeyService, IDisposable
 
         try
         {
-            var text = UiaSelectionService.TryGetSelectedText();
+            var text = _textSelectionService.GetSelectedText();
             if (!string.IsNullOrWhiteSpace(text))
                 _onHotkeyPressed?.Invoke(text.Trim());
         }
