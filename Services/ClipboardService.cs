@@ -35,9 +35,9 @@ public class ClipboardService : IClipboardService
             SimulateKeyUp(Win32Api.VK_C);
             SimulateKeyUp(Win32Api.VK_CONTROL);
 
-            for (int i = 0; i < 10; i++)
+            for (int i = 0; i < AppConstants.ClipboardMaxPollCount; i++)
             {
-                Thread.Sleep(50);
+                Thread.Sleep(AppConstants.ClipboardPollInterval);
                 if (Win32Api.GetClipboardSequenceNumber() != seqBefore)
                     break;
             }
@@ -83,7 +83,7 @@ public class ClipboardService : IClipboardService
                     Clipboard.SetText(text);
                 return;
             }
-            catch { Thread.Sleep(100); }
+            catch { Thread.Sleep(AppConstants.ClipboardRestoreRetryDelayMs); }
         }
     }
 

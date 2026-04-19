@@ -19,7 +19,7 @@ public class TranslationService : ITranslationService
     private string? _apiKey;
     private string _model = "gpt-4o-mini";
     private HttpClient? _client;
-    private static readonly TimeSpan Timeout = TimeSpan.FromSeconds(30);
+    private static readonly TimeSpan Timeout = TimeSpan.FromSeconds(AppConstants.TranslationTimeoutSeconds);
 
     public bool IsConfigured => !string.IsNullOrEmpty(_apiUrl) && !string.IsNullOrEmpty(_apiKey);
 
@@ -90,8 +90,8 @@ public class TranslationService : ITranslationService
                 new { role = "system", content = "你是一个翻译助手。将用户输入的英文文本翻译为中文。只输出翻译结果，不要添加任何解释、注释或额外内容。" },
                 new { role = "user", content = text }
             },
-            temperature = 0.3,
-            max_tokens = 2000
+            temperature = AppConstants.TranslationTemperature,
+            max_tokens = AppConstants.TranslationMaxTokens
         };
 
         var json = JsonSerializer.Serialize(requestBody);

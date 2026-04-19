@@ -17,10 +17,6 @@ public interface IWindowManager
 public class WindowManager : IWindowManager
 {
     private readonly TranslationPopup _popup;
-    private const double PopupWidth = 400;
-    private const double PopupMaxHeight = 450;
-    private const int OffsetX = 20;
-    private const int OffsetY = 20;
     private (double X, double Y) _popupPos = (100, 100);
 
     [DllImport("user32.dll", SetLastError = true)]
@@ -47,23 +43,23 @@ public class WindowManager : IWindowManager
     {
         _popup.SetContent(translatedText);
         _popup.WindowStartupLocation = WindowStartupLocation.Manual;
-        _popup.MaxWidth = PopupWidth;
-        _popup.MaxHeight = PopupMaxHeight;
+        _popup.MaxWidth = AppConstants.PopupWidth;
+        _popup.MaxHeight = AppConstants.PopupMaxHeight;
         _popup.Left = 0;
         _popup.Top = 0;
         _popup.Show();
 
         var hwnd = new WindowInteropHelper(_popup).Handle;
-        var x = (int)_popupPos.X + OffsetX;
-        var y = (int)_popupPos.Y + OffsetY;
+        var x = (int)_popupPos.X + AppConstants.PopupOffsetX;
+        var y = (int)_popupPos.Y + AppConstants.PopupOffsetY;
 
         var screenWidth = GetSystemMetrics(SM_CXSCREEN);
         var screenHeight = GetSystemMetrics(SM_CYSCREEN);
 
-        if (x + PopupWidth > screenWidth)
-            x = screenWidth - (int)PopupWidth - 10;
-        if (y + PopupMaxHeight > screenHeight)
-            y = (int)_popupPos.Y - (int)PopupMaxHeight - 10;
+        if (x + AppConstants.PopupWidth > screenWidth)
+            x = screenWidth - (int)AppConstants.PopupWidth - 10;
+        if (y + AppConstants.PopupMaxHeight > screenHeight)
+            y = (int)_popupPos.Y - (int)AppConstants.PopupMaxHeight - 10;
         if (x < 0) x = 8;
         if (y < 0) y = 8;
 

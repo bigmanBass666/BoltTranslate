@@ -1,6 +1,7 @@
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Interop;
+using TranslateSharp.Services.NativeInterop;
 
 namespace TranslateSharp.Windows;
 
@@ -15,7 +16,8 @@ public partial class TranslationPopup : Window
     private void OnSourceInitialized(object? sender, EventArgs e)
     {
         var hwnd = new WindowInteropHelper(this).Handle;
-        WindowsServices.SetWindowExStyle(hwnd, WindowsServices.WS_EX_TOOLWINDOW);
+        var style = Win32Api.GetWindowLong(hwnd, Win32Api.GWL_EXSTYLE);
+        Win32Api.SetWindowLong(hwnd, Win32Api.GWL_EXSTYLE, style | Win32Api.WS_EX_TOOLWINDOW);
     }
 
     public void SetContent(string translatedText)
@@ -39,23 +41,5 @@ public partial class TranslationPopup : Window
     {
         if (e.Source == CloseButton) return;
         DragMove();
-    }
-}
-
-internal static class WindowsServices
-{
-    internal const int WS_EX_TOOLWINDOW = 0x00000080;
-    internal const int GWL_EXSTYLE = -20;
-
-    [System.Runtime.InteropServices.DllImport("user32.dll")]
-    private static extern int GetWindowLong(IntPtr hwnd, int nIndex);
-
-    [System.Runtime.InteropServices.DllImport("user32.dll")]
-    private static extern int SetWindowLong(IntPtr hwnd, int nIndex, int dwNewLong);
-
-    public static void SetWindowExStyle(IntPtr hwnd, int style)
-    {
-        var current = GetWindowLong(hwnd, GWL_EXSTYLE);
-        SetWindowLong(hwnd, GWL_EXSTYLE, current | style);
     }
 }

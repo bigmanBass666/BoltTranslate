@@ -1,15 +1,14 @@
 using System.IO;
-using System.Runtime.InteropServices;
 using System.Windows;
 using TranslateSharp.Config;
 using TranslateSharp.Services;
+using TranslateSharp.Services.NativeInterop;
 
 namespace TranslateSharp;
 
 public partial class App : System.Windows.Application
 {
-    [DllImport("kernel32.dll")]
-    private static extern bool FreeConsole();
+    private const string SystemPrompt = "你是一个翻译助手。将用户输入的英文文本翻译为中文。只输出翻译结果，不要添加任何解释、注释或额外内容。";
 
     private MainWindow? _mainWindow;
     private ITranslationService? _translationService;
@@ -21,14 +20,14 @@ public partial class App : System.Windows.Application
     protected override void OnStartup(StartupEventArgs e)
     {
         base.OnStartup(e);
-        FreeConsole();
+        Win32Api.FreeConsole();
 
         try
         {
             LoadConfig();
             InitServices();
             
-            _mainWindow = new MainWindow(_config);
+            _mainWindow = new MainWindow(_config, _translationService!, _windowManager!, _selectionService!);
             _mainWindow.Show();
         }
         catch (Exception ex)
@@ -85,11 +84,6 @@ public partial class App : System.Windows.Application
             await HandleTranslateAsync(text, cursorX, cursorY);
         });
         _selectionService.Start();
-
-        if (_mainWindow != null)
-        {
-            _mainWindow.SetServices(_translationService, _windowManager, _selectionService);
-        }
     }
 
     private async Task HandleTranslateAsync(string text, double cursorX, double cursorY)

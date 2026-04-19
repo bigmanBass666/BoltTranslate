@@ -20,7 +20,7 @@ public class HotkeyService : IHotkeyService, IDisposable
     private readonly int _hotKeyId = 0x9001;
     private bool _isRunning;
     private DateTime _lastTriggerTime = DateTime.MinValue;
-    private static readonly TimeSpan Cooldown = TimeSpan.FromMilliseconds(500);
+    private static readonly TimeSpan Cooldown = AppConstants.HotkeyCooldown;
 
     public HotkeyService(ITextSelectionService textSelectionService)
     {

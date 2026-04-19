@@ -11,22 +11,18 @@ namespace TranslateSharp;
 public partial class MainWindow : Window
 {
     private readonly AppConfig _config;
-    private ITranslationService? _translationService;
-    private IWindowManager? _windowManager;
-    private ISelectionService? _selectionService;
+    private readonly ITranslationService _translationService;
+    private readonly IWindowManager _windowManager;
+    private readonly ISelectionService _selectionService;
     private NotifyIcon? _trayIcon;
 
-    public MainWindow(AppConfig config)
+    public MainWindow(AppConfig config, ITranslationService translationService, IWindowManager windowManager, ISelectionService selectionService)
     {
         _config = config;
-        InitializeComponent();
-    }
-
-    public void SetServices(ITranslationService translationService, IWindowManager windowManager, ISelectionService selectionService)
-    {
         _translationService = translationService;
         _windowManager = windowManager;
         _selectionService = selectionService;
+        InitializeComponent();
     }
 
     private void OnLoaded(object sender, RoutedEventArgs e)
