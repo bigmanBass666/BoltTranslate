@@ -32,6 +32,10 @@
   - 删除 CalculatePosition 等复杂坐标计算，仅保留基本边界检测
   - SelectionService 使用 GetPhysicalCursorPos 获取物理坐标
   - 编译 0 错误 0 警告
+- **Win32 API 集中管理**：
+  - 创建 Services/NativeInterop/Win32Api.cs 集中所有 P/Invoke 声明
+  - 包含：POINT 结构体、窗口定位/样式常量、热键/键盘常量、12 个 Win32 方法
+  - 命名空间：TranslateSharp.Services.NativeInterop
 
 ### 待改进 / Bug
 
