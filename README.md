@@ -44,8 +44,7 @@ dotnet run
   "ApiKey": "",
   "Model": "GLM-4-Flash-250414",
   "ProxyUrl": "",
-  "HotkeyModifiers": "Ctrl+Shift",
-  "HotkeyKey": "T"
+  "Hotkey": "Ctrl+Shift+T"
 }
 ```
 
@@ -55,8 +54,31 @@ dotnet run
 | `ApiKey` | API 密钥（**必填**） | 空（首次启动会提示配置） |
 | `Model` | 模型名称 | GLM-4-Flash |
 | `ProxyUrl` | HTTP 代理地址（如 `http://127.0.0.1:7890`） | 空（不使用代理） |
-| `HotkeyModifiers` | 快捷键修饰键 | Ctrl+Shift |
-| `HotkeyKey` | 快捷键按键 | T |
+| `Hotkey` | 全局快捷键，用 `+` 连接修饰键和按键 | Ctrl+Shift+T |
+
+### 快捷键格式
+
+`Hotkey` 字段支持以下格式：
+
+**基本格式**：`修饰键+按键`，多个修饰键用 `+` 连接
+
+**可用修饰键**：`Ctrl`、`Shift`、`Alt`、`Win`
+
+**可用按键**：
+- 单字母/数字：`A`~`Z`、`0`~`9`
+- 功能键：`F1`~`F12`
+- 特殊键：`Space`（空格）、`Tab`、`Enter`、`Esc`、`Backspace`、`Delete`、`Insert`、`Home`、`End`、`PgUp`、`PgDn`、`Left`/`Up`/`Right`/`Down`（方向键）
+
+**示例**：
+```json
+"Hotkey": "Ctrl+Shift+T"        // 默认
+"Hotkey": "Alt+Q"              // Alt + Q
+"Hotkey": "Ctrl+F1"            // Ctrl + F1
+"Hotkey": "Win+A"              // Win 键 + A
+"Hotkey": "Ctrl+Alt+Shift+F12" // 三键组合 + F12
+```
+
+> ⚠️ 修改 Hotkey 后需重启应用生效（或通过托盘菜单打开配置文件修改后自动重启）。
 
 ### 支持的 API 服务
 
@@ -96,9 +118,9 @@ dotnet run
 
 ### Q：提示「快捷键注册失败」怎么办？
 
-A：`Ctrl+Shift+T` 可能被其他软件占用（如某些输入法、截图工具）。可以：
+A：当前配置的快捷键可能被其他软件占用。可以：
 - 关闭占用该快捷键的程序后重启 TranslateSharp
-- 或修改 `config.json` 中的 `HotkeyModifiers` 和 `HotkeyKey` 为其他组合
+- 或修改 `config.json` 中的 `Hotkey` 为其他组合（如 `"Alt+Q"`、`"Ctrl+F1"`）
 
 ### Q：翻译结果不准确？
 
