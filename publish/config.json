@@ -1,0 +1,8 @@
+{
+  "ApiUrl": "https://open.bigmodel.cn/api/paas/v4/chat/completions",
+  "ApiKey": "32aaa2687b804effb5a7c0ef2c45c766.VgC1p5EwJTOhrI90",
+  "Model": "GLM-4-Flash-250414",
+  "ProxyUrl": "",
+  "HotkeyModifiers": "Ctrl\u002BShift",
+  "HotkeyKey": "T"
+}
