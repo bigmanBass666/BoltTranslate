@@ -42,6 +42,14 @@
   - 使用 Win32Api 集中管理的 P/Invoke，不再自声明
   - 冷却时间 500ms，异常静默忽略（不弹 MessageBox）
   - 选中文本获取：先调用 UiaSelectionService.TryGetSelectedText()，空则返回空字符串
+- **TextSelectionService 重构**：
+  - 将静态类 UiaSelectionService 重构为 ITextSelectionService 接口 + TextSelectionService 实例类
+  - 通过依赖注入接收 IClipboardService，协调 UIA 和 Clipboard 两种选中文本获取方式
+  - UIA 失败时静默返回 null，自动降级到 Clipboard 方式
+  - 更新 HotkeyService 和 SelectionService 的构造函数，注入 TextSelectionService
+  - 简化 SelectionService：删除重复的 Clipboard 操作代码和 Win32 API 声明
+  - 删除旧的 UiaSelectionService.cs 文件
+  - 编译 0 错误 0 警告
 
 ### 待改进 / Bug
 
