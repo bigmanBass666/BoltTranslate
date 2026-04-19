@@ -32,6 +32,14 @@
   - 删除 CalculatePosition 等复杂坐标计算，仅保留基本边界检测
   - SelectionService 使用 GetPhysicalCursorPos 获取物理坐标
   - 编译 0 错误 0 警告
+- **常量类提取（代码质量优化）**：
+  - 创建 Services/AppConstants.cs 统一管理所有魔法数字和硬编码字符串
+  - 包含：弹窗定位参数、热键冷却时间、剪贴板操作延迟/超时、翻译 API 参数和提示词
+  - 更新 WindowManager.cs：移除本地常量，使用 AppConstants
+  - 更新 HotkeyService.cs：热键冷却时间引用 AppConstants
+  - 更新 ClipboardService.cs：所有延迟、轮询次数、超时时间引用 AppConstants
+  - 更新 TranslationService.cs：系统提示词、温度、最大 token、超时时间引用 AppConstants
+  - 编译 0 错误，3 个原有警告（与本次修改无关）
 - **Win32 API 集中管理**：
   - 创建 Services/NativeInterop/Win32Api.cs 集中所有 P/Invoke 声明
   - 包含：POINT 结构体、窗口定位/样式常量、热键/键盘常量、12 个 Win32 方法
