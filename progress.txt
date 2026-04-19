@@ -22,6 +22,17 @@
   - Configure 方法中释放旧 HttpClient 实例后再创建新实例
   - App.OnExit 中调用 TranslationService.Dispose() 确保资源正确释放
 
+## 2026-04-19
+
+### 已完成
+
+- **窗口定位逻辑重写（WindowManager.cs）**：
+  - Show() 后立即用 Win32 SetWindowPos() 覆盖位置，全程使用物理像素坐标系
+  - 新增 P/Invoke：SetWindowPos、LogicalToPhysicalPoint、GetSystemMetrics
+  - 新增 CalculatePositionInPhysical 方法：逻辑坐标→物理坐标转换 + 边界检测
+  - 使用 _popup.ActualWidth/ActualHeight 获取实际渲染尺寸做边界检测
+  - ShowPopupAtSelection 保持 UIA 物理坐标→逻辑坐标统一转换流程
+
 ### 待改进 / Bug
 
 - [ ] 悬浮窗定位在部分环境下仍异常（待用户反馈）

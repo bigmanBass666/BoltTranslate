@@ -17,9 +17,25 @@ public interface IWindowManager
 public class WindowManager : IWindowManager
 {
     private readonly TranslationPopup _popup;
-    private const int PopupWidth = 400;
-    private const int PopupMaxHeight = 450;
-    private (int X, int Y) _popupPos = (100, 100);
+    private const double PopupWidth = 400;
+    private const double PopupMaxHeight = 450;
+    private (double X, double Y) _popupPos = (100, 100);
+
+    [DllImport("user32.dll", SetLastError = true)]
+    private static extern bool SetWindowPos(IntPtr hWnd, IntPtr hWndInsertAfter, int X, int Y, int cx, int cy, uint uFlags);
+
+    private static readonly IntPtr HWND_TOPMOST = new IntPtr(-1);
+    private const uint SWP_NOSIZE = 0x0001;
+    private const uint SWP_NOZORDER = 0x0004;
+    private const uint SWP_NOACTIVATE = 0x0010;
+
+    [DllImport("user32.dll")]
+    private static extern bool LogicalToPhysicalPoint(IntPtr hWnd, ref tagPOINT lpPoint);
+
+    [DllImport("user32.dll")]
+    private static extern int GetSystemMetrics(int nIndex);
+    private const int SM_CXSCREEN = 0;
+    private const int SM_CYSCREEN = 1;
 
     public WindowManager()
     {
@@ -32,36 +48,34 @@ public class WindowManager : IWindowManager
     {
         _popup.SetContent(translatedText);
         _popup.WindowStartupLocation = WindowStartupLocation.Manual;
-        _popup.Left = -9999;
-        _popup.Top = -9999;
         _popup.MaxWidth = PopupWidth;
         _popup.MaxHeight = PopupMaxHeight;
+        _popup.Left = 0;
+        _popup.Top = 0;
         _popup.Show();
 
-        var (x, y) = CalculatePosition(_popupPos.X, _popupPos.Y);
         var hwnd = new WindowInteropHelper(_popup).Handle;
-        if (hwnd != IntPtr.Zero)
-        {
-            SetWindowPos(hwnd, HWND_TOPMOST, x, y, 0, 0, SWP_NOSIZE);
-        }
+        var (physicalX, physicalY) = CalculatePositionInPhysical(hwnd, _popupPos.X, _popupPos.Y);
+        SetWindowPos(hwnd, HWND_TOPMOST, physicalX, physicalY, 0, 0, SWP_NOSIZE | SWP_NOZORDER);
         _popup.Activate();
     }
 
     public void ShowPopup(string translatedText, double cursorX, double cursorY)
     {
-        _popupPos = ((int)cursorX, (int)cursorY);
+        _popupPos = (cursorX, cursorY);
         ShowPopup(translatedText);
     }
 
     public void ShowPopupAtSelection(string translatedText, double cursorX, double cursorY)
     {
-        _popupPos = ((int)cursorX, (int)cursorY);
+        _popupPos = (cursorX, cursorY);
 
         var selectionBounds = UiaSelectionService.GetLastSelectionBounds();
         if (selectionBounds.HasValue)
         {
             var (left, top, right, bottom) = selectionBounds.Value;
-            _popupPos = ((int)(left + right) / 2, (int)bottom + 5);
+            var logicalCenter = PhysicalToLogicalPoint((left + right) / 2, bottom + 5);
+            _popupPos = (logicalCenter.X, logicalCenter.Y);
         }
 
         ShowPopup(translatedText);
@@ -72,32 +86,44 @@ public class WindowManager : IWindowManager
         _popup.Hide();
     }
 
-    private (int X, int Y) CalculatePosition(int cx, int cy)
+    private static (double X, double Y) PhysicalToLogicalPoint(double physicalX, double physicalY)
     {
-        int screenWidth = GetSystemMetrics(SM_CXSCREEN);
-        int screenHeight = GetSystemMetrics(SM_CYSCREEN);
+        var pt = new tagPOINT { X = (int)physicalX, Y = (int)physicalY };
+        PhysicalToLogicalPoint(ref pt);
+        return (pt.X, pt.Y);
+    }
 
-        int x = cx - PopupWidth / 2;
-        int y = cy + 5;
+    private (int X, int Y) CalculatePositionInPhysical(IntPtr hwnd, double logicalCx, double logicalCy)
+    {
+        var pt = new tagPOINT { X = (int)logicalCx, Y = (int)logicalCy };
+        LogicalToPhysicalPoint(hwnd, ref pt);
+        var physicalCx = pt.X;
+        var physicalCy = pt.Y;
 
-        if (x + PopupWidth > screenWidth)
-            x = screenWidth - PopupWidth - 10;
+        var screenWidth = GetSystemMetrics(SM_CXSCREEN);
+        var screenHeight = GetSystemMetrics(SM_CYSCREEN);
+
+        var popupWidth = (int)_popup.ActualWidth;
+        var popupHeight = (int)_popup.ActualHeight;
+        if (popupWidth <= 0) popupWidth = (int)(PopupWidth * (screenWidth / SystemParameters.PrimaryScreenWidth));
+        if (popupHeight <= 0) popupHeight = (int)(PopupMaxHeight * (screenHeight / SystemParameters.PrimaryScreenHeight));
+
+        var x = physicalCx - popupWidth / 2;
+        var y = physicalCy + 5;
+
+        if (x + popupWidth > screenWidth)
+            x = screenWidth - popupWidth - 10;
         if (x < 0) x = 8;
-        if (y + PopupMaxHeight > screenHeight)
-            y = cy - PopupMaxHeight - 10;
+        if (y + popupHeight > screenHeight)
+            y = physicalCy - popupHeight - 10;
         if (y < 0) y = 8;
 
         return (x, y);
     }
 
-    private static readonly IntPtr HWND_TOPMOST = new(-1);
-    private const uint SWP_NOSIZE = 0x0001;
-    private const int SM_CXSCREEN = 0;
-    private const int SM_CYSCREEN = 1;
+    [StructLayout(LayoutKind.Sequential)]
+    private struct tagPOINT { public int X; public int Y; }
 
     [DllImport("user32.dll")]
-    private static extern bool SetWindowPos(IntPtr hWnd, IntPtr hWndInsertAfter, int X, int Y, int cx, int cy, uint uFlags);
-
-    [DllImport("user32.dll")]
-    private static extern int GetSystemMetrics(int nIndex);
+    private static extern void PhysicalToLogicalPoint(ref tagPOINT lpPoint);
 }
