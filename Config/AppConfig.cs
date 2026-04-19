@@ -10,7 +10,25 @@ public class AppConfig
     public string ApiKey { get; set; } = "";
     public string Model { get; set; } = "GLM-4-Flash-250414";
     public string ProxyUrl { get; set; } = "";
+
+    [JsonIgnore]
+    public string? HotkeyModifiers { get; set; }
+
+    [JsonIgnore]
+    public string? HotkeyKey { get; set; }
+
     public string Hotkey { get; set; } = "Ctrl+Shift+T";
+
+    public string EffectiveHotkey
+    {
+        get
+        {
+            if (!string.IsNullOrEmpty(Hotkey)) return Hotkey;
+            if (!string.IsNullOrEmpty(HotkeyModifiers) && !string.IsNullOrEmpty(HotkeyKey))
+                return $"{HotkeyModifiers}+{HotkeyKey}";
+            return "Ctrl+Shift+T";
+        }
+    }
 }
 
 public static class ConfigManager
@@ -25,18 +43,37 @@ public static class ConfigManager
         Converters = { new JsonStringEnumConverter(JsonNamingPolicy.CamelCase) }
     };
 
+    private static readonly JsonSerializerOptions ReadOptions = new()
+    {
+        PropertyNameCaseInsensitive = true
+    };
+
     public static AppConfig Load()
     {
         if (!File.Exists(ConfigPath))
         {
-            var config = new AppConfig();
-            Save(config);
-            return config;
+            var defaultConfig = new AppConfig();
+            Save(defaultConfig);
+            return defaultConfig;
         }
 
         var json = File.ReadAllText(ConfigPath);
-        return JsonSerializer.Deserialize<AppConfig>(json, JsonOptions)
-               ?? new AppConfig();
+        var config = JsonSerializer.Deserialize<AppConfig>(json, ReadOptions)
+                   ?? new AppConfig();
+
+        if (NeedsMigration(config))
+        {
+            config.Hotkey = config.EffectiveHotkey;
+            Save(config);
+        }
+
+        return config;
+    }
+
+    private static bool NeedsMigration(AppConfig config)
+    {
+        return string.IsNullOrEmpty(config.Hotkey)
+               && (!string.IsNullOrEmpty(config.HotkeyModifiers) || !string.IsNullOrEmpty(config.HotkeyKey));
     }
 
     public static void Save(AppConfig config)

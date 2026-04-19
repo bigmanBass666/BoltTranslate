@@ -27,7 +27,7 @@ public class HotkeyService : IHotkeyService, IDisposable
     public HotkeyService(ITextSelectionService textSelectionService, AppConfig config)
     {
         _textSelectionService = textSelectionService;
-        _hotkeyString = config.Hotkey ?? "Ctrl+Shift+T";
+        _hotkeyString = config.EffectiveHotkey;
     }
 
     public void RegisterHotkey(Action<string> onHotkeyPressed)
