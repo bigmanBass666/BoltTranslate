@@ -11,13 +11,15 @@
 - 每次提交后更新 `progress.txt`
 - 记录格式：`### 日期` + 分项列举已完成和待办内容
 
-### 1.3 发布与启动
-- **每次代码修改后**，必须按顺序执行以下操作：
-  1. `dotnet build` 验证编译
-  2. `dotnet publish -r win-x64 --self-contained true -o publish -p:PublishSingleFile=true` 生成最新 exe
-  3. **自动启动最新 exe**（使用 `Environment.ProcessPath` 获取 exe 路径并 Process.Start）
-- 使用 `dotnet build` 而非 `dotnet run`，因为最终要验证的是 publish 后的 exe 行为
-- 本规则目的是：每次改动后立即验证最新 exe 是否符合预期，避免因 exe 未更新导致误判
+### 1.3 开发测试流程
+**日常开发测试**：
+1. `dotnet build` — 验证编译
+2. `dotnet run` — 直接运行最新代码（bin/Debug），无需 publish
+
+**正式发布**（仅在功能验证 OK 后做一次）：
+1. `dotnet publish -r win-x64 --self-contained true -o publish -p:PublishSingleFile=true`
+
+⚠️ **不要每次 build 都 publish！** `dotnet run` 比 publish 快得多，且代码改动立即生效。只有当 `dotnet run` 验证 OK 后，才 publish 一次生成独立 exe。
 
 ---
 
