@@ -36,6 +36,12 @@
   - 创建 Services/NativeInterop/Win32Api.cs 集中所有 P/Invoke 声明
   - 包含：POINT 结构体、窗口定位/样式常量、热键/键盘常量、12 个 Win32 方法
   - 命名空间：TranslateSharp.Services.NativeInterop
+- **HotkeyService 独立服务**：
+  - 从 SelectionService 提取热键管理逻辑，创建独立的 HotkeyService
+  - 接口 IHotkeyService：RegisterHotkey/Start/Stop
+  - 使用 Win32Api 集中管理的 P/Invoke，不再自声明
+  - 冷却时间 500ms，异常静默忽略（不弹 MessageBox）
+  - 选中文本获取：先调用 UiaSelectionService.TryGetSelectedText()，空则返回空字符串
 
 ### 待改进 / Bug
 
