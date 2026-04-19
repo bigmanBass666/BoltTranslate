@@ -86,7 +86,7 @@ public class SelectionService : ISelectionService, IDisposable
         if (DateTime.Now - _lastTriggerTime < Cooldown) return;
         _lastTriggerTime = DateTime.Now;
 
-        GetCursorPos(out var pt);
+        GetPhysicalCursorPos(out var pt);
         double cursorX = pt.X;
         double cursorY = pt.Y;
 
@@ -221,7 +221,7 @@ public class SelectionService : ISelectionService, IDisposable
     private static extern uint GetClipboardSequenceNumber();
 
     [DllImport("user32.dll")]
-    private static extern bool GetCursorPos(out POINT lpPoint);
+    private static extern bool GetPhysicalCursorPos(out POINT lpPoint);
 
     [StructLayout(LayoutKind.Sequential)]
     private struct POINT { public int X; public int Y; }

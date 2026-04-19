@@ -26,12 +26,13 @@
 
 ### 已完成
 
-- **悬浮窗定位重写（SetWindowPos 覆盖方案）**：
-  - Show() 后立即用 Win32 SetWindowPos() 覆盖位置，全程使用物理像素坐标系
-  - 新增 P/Invoke：SetWindowPos、LogicalToPhysicalPoint、GetSystemMetrics
-  - CalculatePositionInPhysical：逻辑坐标→物理坐标转换 + 边界检测
-  - 使用 _popup.ActualWidth/ActualHeight 获取实际渲染尺寸
-  - UIA 坐标通过 PhysicalToLogicalPoint 转换后统一走 ShowPopup 流程
+- **悬浮窗定位修复（全物理坐标方案）**：
+  - 根因：LogicalToPhysicalPoint / PhysicalToLogicalPoint 在 PerMonitorV2 模式下是 NO-OP
+  - SelectionService：GetCursorPos → GetPhysicalCursorPos（直接返回物理坐标）
+  - WindowManager：删除所有逻辑↔物理坐标转换 API，全程物理坐标零转换
+  - CalculatePosition 重写：输入已是物理坐标，直接计算边界检测
+  - ShowPopupAtSelection：UIA 返回的物理坐标直接使用，不再转换
+  - SetWindowPos 增加 SWP_NOACTIVATE 标志
   - 编译 0 错误 0 警告
 
 ### 待改进 / Bug

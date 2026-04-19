@@ -30,9 +30,6 @@ public class WindowManager : IWindowManager
     private const uint SWP_NOACTIVATE = 0x0010;
 
     [DllImport("user32.dll")]
-    private static extern bool LogicalToPhysicalPoint(IntPtr hWnd, ref tagPOINT lpPoint);
-
-    [DllImport("user32.dll")]
     private static extern int GetSystemMetrics(int nIndex);
     private const int SM_CXSCREEN = 0;
     private const int SM_CYSCREEN = 1;
@@ -55,8 +52,8 @@ public class WindowManager : IWindowManager
         _popup.Show();
 
         var hwnd = new WindowInteropHelper(_popup).Handle;
-        var (physicalX, physicalY) = CalculatePositionInPhysical(hwnd, _popupPos.X, _popupPos.Y);
-        SetWindowPos(hwnd, HWND_TOPMOST, physicalX, physicalY, 0, 0, SWP_NOSIZE | SWP_NOZORDER);
+        var (physicalX, physicalY) = CalculatePosition(_popupPos.X, _popupPos.Y);
+        SetWindowPos(hwnd, HWND_TOPMOST, physicalX, physicalY, 0, 0, SWP_NOSIZE | SWP_NOZORDER | SWP_NOACTIVATE);
         _popup.Activate();
     }
 
@@ -74,8 +71,7 @@ public class WindowManager : IWindowManager
         if (selectionBounds.HasValue)
         {
             var (left, top, right, bottom) = selectionBounds.Value;
-            var logicalCenter = PhysicalToLogicalPoint((left + right) / 2, bottom + 5);
-            _popupPos = (logicalCenter.X, logicalCenter.Y);
+            _popupPos = ((left + right) / 2, bottom + 5);
         }
 
         ShowPopup(translatedText);
@@ -86,36 +82,24 @@ public class WindowManager : IWindowManager
         _popup.Hide();
     }
 
-    private static (double X, double Y) PhysicalToLogicalPoint(double physicalX, double physicalY)
+    private (int X, int Y) CalculatePosition(double physicalCx, double physicalCy)
     {
-        var pt = new tagPOINT { X = (int)physicalX, Y = (int)physicalY };
-        PhysicalToLogicalPoint(ref pt);
-        return (pt.X, pt.Y);
-    }
-
-    private (int X, int Y) CalculatePositionInPhysical(IntPtr hwnd, double logicalCx, double logicalCy)
-    {
-        var pt = new tagPOINT { X = (int)logicalCx, Y = (int)logicalCy };
-        LogicalToPhysicalPoint(hwnd, ref pt);
-        var physicalCx = pt.X;
-        var physicalCy = pt.Y;
-
         var screenWidth = GetSystemMetrics(SM_CXSCREEN);
         var screenHeight = GetSystemMetrics(SM_CYSCREEN);
 
         var popupWidth = (int)_popup.ActualWidth;
         var popupHeight = (int)_popup.ActualHeight;
-        if (popupWidth <= 0) popupWidth = (int)(PopupWidth * (screenWidth / SystemParameters.PrimaryScreenWidth));
-        if (popupHeight <= 0) popupHeight = (int)(PopupMaxHeight * (screenHeight / SystemParameters.PrimaryScreenHeight));
+        if (popupWidth <= 0) popupWidth = 400;
+        if (popupHeight <= 0) popupHeight = 450;
 
-        var x = physicalCx - popupWidth / 2;
-        var y = physicalCy + 5;
+        var x = (int)(physicalCx - popupWidth / 2);
+        var y = (int)(physicalCy + 5);
 
         if (x + popupWidth > screenWidth)
             x = screenWidth - popupWidth - 10;
         if (x < 0) x = 8;
         if (y + popupHeight > screenHeight)
-            y = physicalCy - popupHeight - 10;
+            y = (int)(physicalCy - popupHeight - 10);
         if (y < 0) y = 8;
 
         return (x, y);
@@ -123,7 +107,4 @@ public class WindowManager : IWindowManager
 
     [StructLayout(LayoutKind.Sequential)]
     private struct tagPOINT { public int X; public int Y; }
-
-    [DllImport("user32.dll")]
-    private static extern void PhysicalToLogicalPoint(ref tagPOINT lpPoint);
 }
