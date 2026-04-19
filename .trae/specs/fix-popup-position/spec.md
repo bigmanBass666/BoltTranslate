@@ -1,22 +1,22 @@
 # 悬浮窗定位修复 Spec
 
 ## Why
-悬浮窗位置不准确，出现在鼠标很上方且偏右，无法跟随选中文字/光标显示。
+悬浮窗位置「偏上 + 偏中间」（左边选字偏右，右边选字偏左）。根因：`LogicalToPhysicalPoint` 在 PerMonitorV2 模式下是**空操作（NO-OP）**，逻辑坐标被直接当物理坐标传给 `SetWindowPos`。
 
 ## What Changes
-- 重写 WindowManager 窗口定位逻辑：采用 **Show() → SetWindowPos() 覆盖** 方式
-- 统一使用 Win32 物理像素坐标系，绕过 WPF Left/Top 的内部坐标空间问题
+- **SelectionService**: 用 `GetPhysicalCursorPos` 替代 `GetCursorPos`，直接获取物理坐标
+- **WindowManager**: 移除所有坐标转换，全程使用物理坐标；UIA 坐标本身已是物理坐标，无需转换
 
 ## Impact
-- Affected code: `Services/WindowManager.cs`
+- Affected code: `Services/SelectionService.cs`, `Services/WindowManager.cs`
 - Affected behavior: 悬浮窗显示位置
 
 ---
 
 ## ADDED Requirements
 
-### Requirement: 悬浮窗正确定位 — SetWindowPos 覆盖方案
-系统 SHALL 使用「先 Show 再 SetWindowPos 覆盖」方式定位翻译弹窗，全程使用 Win32 物理坐标。
+### Requirement: 悬浮窗正确定位 — 全物理坐标方案
+系统 SHALL 全程使用物理像素坐标系定位翻译弹窗，不做任何逻辑↔物理转换。
 
 #### Scenario: 光标定位成功
 - **WHEN** 用户选中文字并按 Ctrl+Shift+T
@@ -28,7 +28,7 @@
 
 #### Scenario: UIA 不可用时使用光标位置兜底
 - **WHEN** UI Automation 无法获取选中文字坐标
-- **THEN** 弹窗以 GetCursorPos 获取的光标位置为基准（需转为物理坐标）
+- **THEN** 弹窗以 GetPhysicalCursorPos 获取的光标位置为基准（物理坐标，无转换）
 
 #### Scenario: 屏幕边缘检测
 - **WHEN** 弹窗超出屏幕右边缘或下边缘
