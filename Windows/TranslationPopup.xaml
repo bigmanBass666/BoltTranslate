@@ -10,7 +10,7 @@
         ResizeMode="NoResize"
         KeyDown="OnKeyDown"
         MouseLeftButtonDown="OnMouseLeftButtonDown">
-    <Border x:Name="PopupBorder" CornerRadius="8" Background="#FFFFFFFF" BorderBrush="#0D000000" BorderThickness="1">
+    <Border x:Name="PopupBorder" CornerRadius="8" Background="#FFFFFFFF" BorderBrush="#0D000000" BorderThickness="1" Cursor="SizeAll">
         <Border.Effect>
             <DropShadowEffect BlurRadius="16" ShadowDepth="3" Opacity="0.15" Color="Black" Direction="270"/>
         </Border.Effect>
