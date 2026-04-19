@@ -58,6 +58,14 @@
   - 简化 SelectionService：删除重复的 Clipboard 操作代码和 Win32 API 声明
   - 删除旧的 UiaSelectionService.cs 文件
   - 编译 0 错误 0 警告
+- **依赖注入重构**：
+  - MainWindow 改为构造函数注入，移除 SetServices() 方法
+  - 字段从可空类型改为 readonly 非空类型，消除 null 风险
+  - App.xaml.cs 清理 FreeConsole P/Invoke（改用 Win32Api.FreeConsole）
+  - 提取翻译 SystemPrompt 为私有常量
+  - TranslationPopup 移除 WindowsServices 内部类，改用 Win32Api
+  - 统一所有 Win32 API 调用到 Services/NativeInterop/Win32Api.cs
+  - 编译 0 错误 0 警告
 
 ### 待改进 / Bug
 
