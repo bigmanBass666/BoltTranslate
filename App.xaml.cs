@@ -1,4 +1,5 @@
 using System.IO;
+using System.Runtime.InteropServices;
 using System.Windows;
 using TranslateSharp.Config;
 using TranslateSharp.Services;
@@ -7,15 +8,20 @@ namespace TranslateSharp;
 
 public partial class App : System.Windows.Application
 {
+    [DllImport("kernel32.dll")]
+    private static extern bool FreeConsole();
+
     private MainWindow? _mainWindow;
     private ITranslationService? _translationService;
     private IWindowManager? _windowManager;
     private ISelectionService? _selectionService;
     private AppConfig _config = null!;
+    private string _lastTranslatedText = "";
 
     protected override void OnStartup(StartupEventArgs e)
     {
         base.OnStartup(e);
+        FreeConsole();
 
         try
         {
@@ -41,8 +47,8 @@ public partial class App : System.Windows.Application
     private void LoadConfig()
     {
         _config = ConfigManager.Load();
-        
-        if (string.IsNullOrWhiteSpace(_config.ApiKey))
+
+        while (string.IsNullOrWhiteSpace(_config.ApiKey))
         {
             var result = System.Windows.MessageBox.Show(
                 "首次使用请配置 API Key。\n\n是否现在打开 config.json 进行配置？",
@@ -52,10 +58,13 @@ public partial class App : System.Windows.Application
 
             if (result == MessageBoxResult.Yes)
             {
-                OpenConfigFile();
+                OpenConfigFileAndWait();
+                _config = ConfigManager.Load();
             }
-
-            throw new InvalidOperationException("请在 config.json 中配置 ApiKey 后重启程序");
+            else
+            {
+                throw new InvalidOperationException("请在 config.json 中配置 ApiKey 后重启程序");
+            }
         }
     }
 
@@ -67,9 +76,9 @@ public partial class App : System.Windows.Application
         _windowManager = new WindowManager();
 
         _selectionService = new SelectionService();
-        _selectionService.RegisterHotkey(async text =>
+        _selectionService.RegisterHotkey(async (text, cursorX, cursorY) =>
         {
-            await HandleTranslateAsync(text);
+            await HandleTranslateAsync(text, cursorX, cursorY);
         });
         _selectionService.Start();
 
@@ -79,15 +88,17 @@ public partial class App : System.Windows.Application
         }
     }
 
-    private async Task HandleTranslateAsync(string text)
+    private async Task HandleTranslateAsync(string text, double cursorX, double cursorY)
     {
         if (_translationService == null || _windowManager == null) return;
+        if (text == _lastTranslatedText) return;
+        _lastTranslatedText = text;
 
         try
         {
-            _windowManager.ShowPopup("翻译中...");
+            _windowManager.ShowPopupAtSelection("翻译中...", cursorX, cursorY);
             var result = await _translationService.TranslateAsync(text);
-            _windowManager.ShowPopup(result);
+            _windowManager.ShowPopupAtSelection(result, cursorX, cursorY);
         }
         catch (TranslationException ex)
         {
@@ -99,16 +110,20 @@ public partial class App : System.Windows.Application
         }
     }
 
-    private static void OpenConfigFile()
+    private static void OpenConfigFileAndWait()
     {
         var path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "config.json");
-        File.WriteAllText(path, System.Text.Json.JsonSerializer.Serialize(
-            new AppConfig(), new System.Text.Json.JsonSerializerOptions { WriteIndented = true }));
+        if (!File.Exists(path))
+        {
+            File.WriteAllText(path, System.Text.Json.JsonSerializer.Serialize(
+                new AppConfig(), new System.Text.Json.JsonSerializerOptions { WriteIndented = true }));
+        }
         using var proc = System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
         {
             FileName = "notepad.exe",
             Arguments = $"\"{path}\"",
             UseShellExecute = true
         });
+        proc?.WaitForExit();
     }
 }

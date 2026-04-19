@@ -8,14 +8,14 @@ namespace TranslateSharp.Services;
 
 public interface ISelectionService
 {
-    void RegisterHotkey(Action<string> onTranslateRequested);
+    void RegisterHotkey(Action<string, double, double> onTranslateRequested);
     void Start();
     void Stop();
 }
 
 public class SelectionService : ISelectionService, IDisposable
 {
-    private Action<string>? _onTranslateRequested;
+    private Action<string, double, double>? _onTranslateRequested;
     private IntPtr _hwnd;
     private HwndSource? _hwndSource;
     private int _hotKeyId = 0x9001;
@@ -23,7 +23,7 @@ public class SelectionService : ISelectionService, IDisposable
     private DateTime _lastTriggerTime = DateTime.MinValue;
     private static readonly TimeSpan Cooldown = TimeSpan.FromMilliseconds(500);
 
-    public void RegisterHotkey(Action<string> onTranslateRequested)
+    public void RegisterHotkey(Action<string, double, double> onTranslateRequested)
     {
         _onTranslateRequested = onTranslateRequested;
     }
@@ -86,11 +86,15 @@ public class SelectionService : ISelectionService, IDisposable
         if (DateTime.Now - _lastTriggerTime < Cooldown) return;
         _lastTriggerTime = DateTime.Now;
 
+        GetCursorPos(out var pt);
+        double cursorX = pt.X;
+        double cursorY = pt.Y;
+
         try
         {
             var text = GetSelectedText();
             if (!string.IsNullOrWhiteSpace(text))
-                _onTranslateRequested?.Invoke(text.Trim());
+                _onTranslateRequested?.Invoke(text.Trim(), cursorX, cursorY);
         }
         catch (Exception ex)
         {
@@ -100,57 +104,90 @@ public class SelectionService : ISelectionService, IDisposable
 
     private static string GetSelectedText()
     {
+        var uiaText = UiaSelectionService.TryGetSelectedText();
+        if (!string.IsNullOrEmpty(uiaText))
+            return uiaText;
+
+        return GetSelectedTextViaClipboard();
+    }
+
+    private static string GetSelectedTextViaClipboard()
+    {
         string savedText = "";
         string selectedText = "";
 
-        var thread = new Thread(() =>
+        var clipboardOp = new Thread(() =>
         {
-            try
+            var seqBefore = GetClipboardSequenceNumber();
+
+            try { savedText = System.Windows.Forms.Clipboard.GetText(); } catch { }
+
+            var foregroundWnd = GetForegroundWindow();
+
+            Thread.Sleep(50);
+            keybd_event(VK_CONTROL, 0, KEYEVENTF_KEYUP, 0);
+            keybd_event(VK_SHIFT, 0, KEYEVENTF_KEYUP, 0);
+            keybd_event(VK_MENU, 0, KEYEVENTF_KEYUP, 0);
+            Thread.Sleep(30);
+
+            keybd_event(VK_CONTROL, 0, 0, 0);
+            keybd_event(0x43, 0, 0, 0);
+            keybd_event(0x43, 0, KEYEVENTF_KEYUP, 0);
+            keybd_event(VK_CONTROL, 0, KEYEVENTF_KEYUP, 0);
+
+            for (int i = 0; i < 10; i++)
             {
-                savedText = System.Windows.Forms.Clipboard.GetText();
+                Thread.Sleep(50);
+                var seqAfter = GetClipboardSequenceNumber();
+                if (seqAfter != seqBefore)
+                    break;
             }
-            catch { }
-        });
-        thread.SetApartmentState(ApartmentState.STA);
-        thread.Start();
-        thread.Join(500);
 
-        var foregroundWnd = GetForegroundWindow();
+            try { selectedText = System.Windows.Forms.Clipboard.GetText(); } catch { }
 
-        keybd_event(VK_CONTROL, 0, 0, 0);
-        keybd_event(0x43, 0, 0, 0);
-        keybd_event(0x43, 0, KEYEVENTF_KEYUP, 0);
-        keybd_event(VK_CONTROL, 0, KEYEVENTF_KEYUP, 0);
-
-        Thread.Sleep(150);
-
-        var readThread = new Thread(() =>
-        {
-            try
+            var seqFinal = GetClipboardSequenceNumber();
+            if (seqFinal == seqBefore)
             {
-                selectedText = System.Windows.Forms.Clipboard.GetText();
+                selectedText = "";
+                SetForegroundWindow(foregroundWnd);
+                return;
             }
-            catch { }
-        });
-        readThread.SetApartmentState(ApartmentState.STA);
-        readThread.Start();
-        readThread.Join(500);
 
-        var restoreThread = new Thread(() =>
-        {
-            try
+            if (selectedText == savedText)
             {
-                System.Windows.Forms.Clipboard.SetText(savedText);
+                selectedText = "";
+                RestoreClipboard(savedText);
+                SetForegroundWindow(foregroundWnd);
+                return;
             }
-            catch { }
-        });
-        restoreThread.SetApartmentState(ApartmentState.STA);
-        restoreThread.Start();
-        restoreThread.Join(500);
 
-        SetForegroundWindow(foregroundWnd);
+            RestoreClipboard(savedText);
+            SetForegroundWindow(foregroundWnd);
+        });
+        clipboardOp.SetApartmentState(ApartmentState.STA);
+        clipboardOp.Start();
+        clipboardOp.Join(8000);
 
         return selectedText;
+    }
+
+    private static void RestoreClipboard(string text)
+    {
+        for (int i = 0; i < 5; i++)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(text))
+                    System.Windows.Forms.Clipboard.Clear();
+                else
+                    System.Windows.Forms.Clipboard.SetText(text);
+                return;
+            }
+            catch
+            {
+                Thread.Sleep(100);
+            }
+        }
     }
 
     #region Win32 API
@@ -162,6 +199,8 @@ public class SelectionService : ISelectionService, IDisposable
     private const uint KEYEVENTF_KEYUP = 0x0002;
     private const byte VK_CONTROL = 0x11;
     private const byte VK_C = 0x43;
+    private const byte VK_SHIFT = 0x10;
+    private const byte VK_MENU = 0x12;
 
     [DllImport("user32.dll", SetLastError = true)]
     private static extern bool RegisterHotKey(IntPtr hWnd, int id, uint fsModifiers, uint vk);
@@ -177,6 +216,15 @@ public class SelectionService : ISelectionService, IDisposable
 
     [DllImport("user32.dll")]
     private static extern bool SetForegroundWindow(IntPtr hWnd);
+
+    [DllImport("user32.dll")]
+    private static extern uint GetClipboardSequenceNumber();
+
+    [DllImport("user32.dll")]
+    private static extern bool GetCursorPos(out POINT lpPoint);
+
+    [StructLayout(LayoutKind.Sequential)]
+    private struct POINT { public int X; public int Y; }
 
     #endregion
 

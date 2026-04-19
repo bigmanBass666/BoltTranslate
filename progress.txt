@@ -1,0 +1,36 @@
+# TranslateSharp 开发进度
+
+## 2026-04-17
+
+### 已完成
+
+- **UI 美化**：悬浮窗重新设计（圆角、边距、关闭按钮）
+- **失焦关闭修复**：移除失焦自动关闭，只保留 X 和 ESC
+- **托盘重启功能**：右键菜单添加"重启"选项
+- **FreeConsole**：启动时释放控制台窗口
+- **Config 首次配置提示**：未配置 API Key 时自动打开记事本并等待编辑完成
+
+### 已修复（架构重构）
+
+- **剪贴板污染（根因修复）**：
+  - 改为单个 STA 线程完成所有剪贴板操作，避免多线程竞争
+  - 空选中检测：`selectedText == savedText` 时返回空
+  - 恢复时区分空字符串（用 Clear）和非空（用 SetText），带重试机制
+- **UI Automation（实验性）**：新增 UiaSelectionService，用 COM IUIAutomation 原生接口获取选中文字，完全不碰剪贴板
+- **空选中检测**：剪贴板序列号检测 `GetClipboardSequenceNumber`，序列号没变说明没有新内容被复制
+- **去重逻辑**：缓存 `_lastTranslatedText`，避免重复翻译
+
+### 已修复（悬浮窗定位）
+
+- **DPI 感知**：.NET 8 WPF PerMonitorV2 模式下，全部使用 Win32 API（GetCursorPos、GetSystemMetrics、SetWindowPos）避免坐标系混用
+- **光标坐标兜底**：UIA 失败时用光标位置作为兜底
+
+### 待修复/待改进
+
+- [ ] 悬浮窗位置偶尔出现在左上角（疑似 DPI 缩放问题）
+- [ ] UI Automation 在部分应用下不稳定
+- [ ] 开机自启动
+- [ ] 翻译历史记录
+- [ ] 多语言互译
+- [ ] 自定义快捷键配置化
+- [ ] 深色模式支持

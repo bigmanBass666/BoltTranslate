@@ -1,32 +1,47 @@
 <Window x:Class="TranslateSharp.Windows.TranslationPopup"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="翻译结果" Height="Auto" Width="420"
+        Title="翻译结果" Height="Auto" Width="400"
         WindowStyle="None"
         AllowsTransparency="True"
         Background="Transparent"
         Topmost="True"
         ShowInTaskbar="False"
         ResizeMode="NoResize"
-        Deactivated="OnDeactivated"
         KeyDown="OnKeyDown"
         MouseLeftButtonDown="OnMouseLeftButtonDown">
-    <Border x:Name="PopupBorder" CornerRadius="12" Background="#F0FFFFFF" BorderBrush="#1A000000" BorderThickness="1">
+    <Border x:Name="PopupBorder" CornerRadius="8" Background="#FFFFFFFF" BorderBrush="#0D000000" BorderThickness="1">
         <Border.Effect>
-            <DropShadowEffect BlurRadius="20" ShadowDepth="4" Opacity="0.25" Color="Black"/>
+            <DropShadowEffect BlurRadius="16" ShadowDepth="3" Opacity="0.15" Color="Black" Direction="270"/>
         </Border.Effect>
-        <TextBox x:Name="TranslatedTextBox"
-                 TextWrapping="Wrap"
-                 MaxWidth="390"
-                 MaxHeight="400"
-                 IsReadOnly="True"
-                 BorderThickness="0"
-                 Background="Transparent"
-                 Foreground="#1A1A1A"
-                 FontSize="14"
-                 FontFamily="Microsoft YaHei UI"
-                 VerticalScrollBarVisibility="Auto"
-                 Padding="16,14,16,14"
-                 Cursor="Arrow"/>
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+            <TextBlock x:Name="CloseButton"
+                       Grid.Row="0"
+                       Text="✕"
+                       FontSize="12"
+                       Foreground="#BBBBBB"
+                       HorizontalAlignment="Right"
+                       Margin="0,8,10,0"
+                       Cursor="Hand"
+                       MouseLeftButtonDown="OnCloseClick"/>
+            <TextBox x:Name="TranslatedTextBox"
+                     Grid.Row="1"
+                     TextWrapping="Wrap"
+                     MaxWidth="380"
+                     MaxHeight="400"
+                     IsReadOnly="True"
+                     BorderThickness="0"
+                     Background="Transparent"
+                     Foreground="#222222"
+                     FontSize="14"
+                     FontFamily="Microsoft YaHei UI, Segoe UI, sans-serif"
+                     VerticalScrollBarVisibility="Auto"
+                     Padding="12,4,12,10"
+                     Cursor="Arrow"/>
+        </Grid>
     </Border>
 </Window>

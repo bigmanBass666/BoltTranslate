@@ -6,9 +6,9 @@ namespace TranslateSharp.Config;
 
 public class AppConfig
 {
-    public string ApiUrl { get; set; } = "https://api.openai.com/v1/chat/completions";
+    public string ApiUrl { get; set; } = "https://open.bigmodel.cn/api/paas/v4/chat/completions";
     public string ApiKey { get; set; } = "";
-    public string Model { get; set; } = "gpt-4o-mini";
+    public string Model { get; set; } = "GLM-4-Flash-250414";
     public string ProxyUrl { get; set; } = "";
     public string HotkeyModifiers { get; set; } = "Ctrl+Shift";
     public string HotkeyKey { get; set; } = "T";

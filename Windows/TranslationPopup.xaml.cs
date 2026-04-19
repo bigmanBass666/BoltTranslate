@@ -10,7 +10,6 @@ public partial class TranslationPopup : Window
     {
         InitializeComponent();
         SourceInitialized += OnSourceInitialized;
-        TranslatedTextBox.PreviewMouseLeftButtonDown += OnTextBoxMouseDown;
     }
 
     private void OnSourceInitialized(object? sender, EventArgs e)
@@ -25,26 +24,21 @@ public partial class TranslationPopup : Window
         SizeToContent = SizeToContent.WidthAndHeight;
     }
 
-    private void OnTextBoxMouseDown(object sender, MouseButtonEventArgs e)
-    {
-        if (e.ClickCount == 1)
-            DragMove();
-    }
-
-    private void OnMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
-    {
-        DragMove();
-    }
-
-    private void OnDeactivated(object? sender, EventArgs e)
-    {
-        Hide();
-    }
-
     private void OnKeyDown(object sender, System.Windows.Input.KeyEventArgs e)
     {
         if (e.Key == Key.Escape)
             Hide();
+    }
+
+    private void OnCloseClick(object sender, MouseButtonEventArgs e)
+    {
+        Hide();
+    }
+
+    private void OnMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+    {
+        if (e.Source == CloseButton) return;
+        DragMove();
     }
 }
 

@@ -60,6 +60,9 @@ public partial class MainWindow : Window
         var openConfigItem = new ToolStripMenuItem("打开配置文件", null, (_, _) => OpenConfigFile());
         menu.Items.Add(openConfigItem);
 
+        var restartItem = new ToolStripMenuItem("重启", null, (_, _) => RestartApplication());
+        menu.Items.Add(restartItem);
+
         var exitItem = new ToolStripMenuItem("退出", null, (_, _) => ExitApplication());
         menu.Items.Add(exitItem);
 
@@ -118,6 +121,18 @@ public partial class MainWindow : Window
     private void ExitApplication()
     {
         _trayIcon?.Dispose();
+        System.Windows.Application.Current.Shutdown();
+    }
+
+    private void RestartApplication()
+    {
+        _trayIcon?.Dispose();
+        var exePath = Environment.ProcessPath ?? Path.Combine(AppContext.BaseDirectory, "TranslateSharp.exe");
+        System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
+        {
+            FileName = exePath,
+            UseShellExecute = true
+        });
         System.Windows.Application.Current.Shutdown();
     }
 }
