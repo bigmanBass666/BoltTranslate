@@ -9,25 +9,22 @@
 - **托盘重启功能**：右键菜单添加"重启"选项
 - **FreeConsole**：启动时释放控制台窗口
 - **Config 首次配置提示**：未配置 API Key 时自动打开记事本并等待编辑完成
-
-### 已修复（架构重构）
-
-- **剪贴板污染（根因修复）**：
+- **剪贴板污染（架构级修复）**：
   - 改为单个 STA 线程完成所有剪贴板操作，避免多线程竞争
   - 空选中检测：`selectedText == savedText` 时返回空
-  - 恢复时区分空字符串（用 Clear）和非空（用 SetText），带重试机制
-- **UI Automation（实验性）**：新增 UiaSelectionService，用 COM IUIAutomation 原生接口获取选中文字，完全不碰剪贴板
-- **空选中检测**：剪贴板序列号检测 `GetClipboardSequenceNumber`，序列号没变说明没有新内容被复制
+  - 恢复时区分空字符串（Clear）和非空（SetText），带重试机制
+  - GetClipboardSequenceNumber 序列号检测
+- **UI Automation（实验性）**：COM IUIAutomation 原生接口获取选中文字，不碰剪贴板
 - **去重逻辑**：缓存 `_lastTranslatedText`，避免重复翻译
+- **悬浮窗定位**：全部 Win32 API（GetCursorPos/SetWindowPos/GetSystemMetrics），光标坐标兜底
+- **HttpClient 资源管理优化**：
+  - TranslationService 实现 IDisposable 接口
+  - Configure 方法中释放旧 HttpClient 实例后再创建新实例
+  - App.OnExit 中调用 TranslationService.Dispose() 确保资源正确释放
 
-### 已修复（悬浮窗定位）
+### 待改进 / Bug
 
-- **DPI 感知**：.NET 8 WPF PerMonitorV2 模式下，全部使用 Win32 API（GetCursorPos、GetSystemMetrics、SetWindowPos）避免坐标系混用
-- **光标坐标兜底**：UIA 失败时用光标位置作为兜底
-
-### 待修复/待改进
-
-- [ ] 悬浮窗位置偶尔出现在左上角（疑似 DPI 缩放问题）
+- [ ] 悬浮窗定位在部分环境下仍异常（待用户反馈）
 - [ ] UI Automation 在部分应用下不稳定
 - [ ] 开机自启动
 - [ ] 翻译历史记录

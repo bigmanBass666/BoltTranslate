@@ -41,6 +41,7 @@ public partial class App : System.Windows.Application
     protected override void OnExit(ExitEventArgs e)
     {
         _selectionService?.Stop();
+        _translationService?.Dispose();
         base.OnExit(e);
     }
 

@@ -6,7 +6,7 @@ using TranslateSharp.Config;
 
 namespace TranslateSharp.Services;
 
-public interface ITranslationService
+public interface ITranslationService : IDisposable
 {
     Task<string> TranslateAsync(string text, CancellationToken ct = default);
     void Configure(string apiUrl, string apiKey, string model, string proxyUrl = "");
@@ -25,6 +25,8 @@ public class TranslationService : ITranslationService
 
     public void Configure(string apiUrl, string apiKey, string model, string proxyUrl = "")
     {
+        _client?.Dispose();
+
         var handler = new SocketsHttpHandler
         {
             ConnectTimeout = Timeout,
@@ -48,10 +50,16 @@ public class TranslationService : ITranslationService
         {
             Timeout = Timeout
         };
-        
+
         _apiUrl = BuildApiUrl(apiUrl);
         _apiKey = apiKey;
         _model = model;
+    }
+
+    public void Dispose()
+    {
+        _client?.Dispose();
+        _client = null;
     }
 
     private static string BuildApiUrl(string url)
