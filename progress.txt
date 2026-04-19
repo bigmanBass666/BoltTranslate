@@ -26,18 +26,15 @@
 
 ### 已完成
 
-- **悬浮窗定位修复（全物理坐标方案）**：
-  - 根因：LogicalToPhysicalPoint / PhysicalToLogicalPoint 在 PerMonitorV2 模式下是 NO-OP
-  - SelectionService：GetCursorPos → GetPhysicalCursorPos（直接返回物理坐标）
-  - WindowManager：删除所有逻辑↔物理坐标转换 API，全程物理坐标零转换
-  - CalculatePosition 重写：输入已是物理坐标，直接计算边界检测
-  - ShowPopupAtSelection：UIA 返回的物理坐标直接使用，不再转换
-  - SetWindowPos 增加 SWP_NOACTIVATE 标志
+- **悬浮窗定位 — 固定偏移方案（最终方案）**：
+  - 经过 7 次动态定位尝试全部失败（DPI 缩放、纯 WPF、SetWindowPos 覆盖、全物理坐标等）
+  - 改为光标右下方固定偏移 +20/+20 物理像素
+  - 删除 CalculatePosition 等复杂坐标计算，仅保留基本边界检测
+  - SelectionService 使用 GetPhysicalCursorPos 获取物理坐标
   - 编译 0 错误 0 警告
 
 ### 待改进 / Bug
 
-- [ ] 悬浮窗定位在部分环境下仍异常（待用户反馈）
 - [ ] UI Automation 在部分应用下不稳定
 - [ ] 开机自启动
 - [ ] 翻译历史记录
