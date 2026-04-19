@@ -45,8 +45,8 @@ public class WindowManager : IWindowManager
         _popup.WindowStartupLocation = WindowStartupLocation.Manual;
         _popup.MaxWidth = AppConstants.PopupWidth;
         _popup.MaxHeight = AppConstants.PopupMaxHeight;
-        _popup.Left = -10000;
-        _popup.Top = -10000;
+        _popup.Left = 0;
+        _popup.Top = 0;
         _popup.Show();
 
         var hwnd = new WindowInteropHelper(_popup).Handle;
