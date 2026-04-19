@@ -78,7 +78,7 @@ public partial class App : System.Windows.Application
         var clipboardService = new ClipboardService();
         var textSelectionService = new TextSelectionService(clipboardService);
 
-        _selectionService = new SelectionService(textSelectionService);
+        _selectionService = new SelectionService(textSelectionService, _config);
         _selectionService.RegisterHotkey(async (text, cursorX, cursorY) =>
         {
             await HandleTranslateAsync(text, cursorX, cursorY);

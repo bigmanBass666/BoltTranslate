@@ -1,6 +1,7 @@
-using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Interop;
+using TranslateSharp.Config;
+using TranslateSharp.Services.NativeInterop;
 
 namespace TranslateSharp.Services;
 
@@ -15,16 +16,18 @@ public class SelectionService : ISelectionService, IDisposable
 {
     private Action<string, double, double>? _onTranslateRequested;
     private readonly ITextSelectionService _textSelectionService;
+    private readonly string _hotkeyString;
     private IntPtr _hwnd;
     private HwndSource? _hwndSource;
-    private int _hotKeyId = 0x9001;
+    private readonly int _hotKeyId = 0x9001;
     private bool _isRunning;
     private DateTime _lastTriggerTime = DateTime.MinValue;
-    private static readonly TimeSpan Cooldown = TimeSpan.FromMilliseconds(500);
+    private static readonly TimeSpan Cooldown = AppConstants.HotkeyCooldown;
 
-    public SelectionService(ITextSelectionService textSelectionService)
+    public SelectionService(ITextSelectionService textSelectionService, AppConfig config)
     {
         _textSelectionService = textSelectionService;
+        _hotkeyString = config.Hotkey ?? "Ctrl+Shift+T";
     }
 
     public void RegisterHotkey(Action<string, double, double> onTranslateRequested)
@@ -44,7 +47,7 @@ public class SelectionService : ISelectionService, IDisposable
     public void Stop()
     {
         if (!_isRunning) return;
-        UnregisterHotkey();
+        Win32Api.UnregisterHotKey(_hwnd, _hotKeyId);
         _hwndSource?.RemoveHook(WndProc);
         _hwndSource?.Dispose();
         _hwndSource = null;
@@ -58,20 +61,10 @@ public class SelectionService : ISelectionService, IDisposable
         _hwndSource = HwndSource.FromHwnd(_hwnd);
         _hwndSource?.AddHook(WndProc);
 
-        if (!RegisterHotkeyInternal())
+        var (modifiers, vk) = ParseHotkey(_hotkeyString);
+        if (!Win32Api.RegisterHotKey(_hwnd, _hotKeyId, modifiers, vk))
             throw new InvalidOperationException(
-                "快捷键注册失败: Ctrl+Shift+T。可能已被其他软件占用");
-    }
-
-    private bool RegisterHotkeyInternal()
-    {
-        return RegisterHotKey(_hwnd, _hotKeyId, MOD_CONTROL | MOD_SHIFT, 0x54);
-    }
-
-    private void UnregisterHotkey()
-    {
-        if (_hwnd != IntPtr.Zero)
-            UnregisterHotKey(_hwnd, _hotKeyId);
+                $"快捷键注册失败: {_hotkeyString}。可能已被其他软件占用");
     }
 
     private IntPtr WndProc(IntPtr hwnd, int msg, IntPtr wParam, IntPtr lParam, ref bool handled)
@@ -90,47 +83,60 @@ public class SelectionService : ISelectionService, IDisposable
         if (DateTime.Now - _lastTriggerTime < Cooldown) return;
         _lastTriggerTime = DateTime.Now;
 
-        GetPhysicalCursorPos(out var pt);
-        double cursorX = pt.X;
-        double cursorY = pt.Y;
+        Win32Api.GetPhysicalCursorPos(out var pt);
 
         try
         {
-            var text = GetSelectedText();
+            var text = _textSelectionService.GetSelectedText();
             if (!string.IsNullOrWhiteSpace(text))
-                _onTranslateRequested?.Invoke(text.Trim(), cursorX, cursorY);
+                _onTranslateRequested?.Invoke(text.Trim(), pt.X, pt.Y);
         }
-        catch (Exception ex)
+        catch
         {
-            System.Windows.MessageBox.Show($"获取选中文字失败: {ex.Message}", "错误", MessageBoxButton.OK, MessageBoxImage.Warning);
         }
     }
 
-    private string GetSelectedText()
+    private static (uint Modifiers, byte Vk) ParseHotkey(string hotkey)
     {
-        return _textSelectionService.GetSelectedText() ?? "";
+        uint modifiers = 0;
+        byte vk = 0;
+        var parts = hotkey.Split('+', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries);
+
+        for (int i = 0; i < parts.Length; i++)
+        {
+            var part = parts[i].ToUpperInvariant();
+            if (i < parts.Length - 1)
+            {
+                switch (part)
+                {
+                    case "CTRL": case "CONTROL": modifiers |= Win32Api.MOD_CONTROL; break;
+                    case "SHIFT": modifiers |= Win32Api.MOD_SHIFT; break;
+                    case "ALT": modifiers |= Win32Api.MOD_ALT; break;
+                    case "WIN": case "SUPER": modifiers |= Win32Api.MOD_WIN; break;
+                }
+            }
+            else
+            {
+                vk = part.Length == 1 ? (byte)char.ToUpperInvariant(part[0]) : ParseVkByName(part);
+            }
+        }
+        return (modifiers, vk > 0 ? vk : (byte)0x54);
     }
 
-    #region Win32 API
-
-    private const uint MOD_ALT = 0x0001;
-    private const uint MOD_CONTROL = 0x0002;
-    private const uint MOD_SHIFT = 0x0004;
-    private const uint MOD_WIN = 0x0008;
-
-    [DllImport("user32.dll", SetLastError = true)]
-    private static extern bool RegisterHotKey(IntPtr hWnd, int id, uint fsModifiers, uint vk);
-
-    [DllImport("user32.dll", SetLastError = true)]
-    private static extern bool UnregisterHotKey(IntPtr hWnd, int id);
-
-    [DllImport("user32.dll")]
-    private static extern bool GetPhysicalCursorPos(out POINT lpPoint);
-
-    [StructLayout(LayoutKind.Sequential)]
-    private struct POINT { public int X; public int Y; }
-
-    #endregion
+    private static byte ParseVkByName(string name)
+    {
+        return name.ToUpperInvariant() switch
+        {
+            "F1" => 0x70, "F2" => 0x71, "F3" => 0x72, "F4" => 0x73,
+            "F5" => 0x74, "F6" => 0x75, "F7" => 0x76, "F8" => 0x77,
+            "F9" => 0x78, "F10" => 0x79, "F11" => 0x7A, "F12" => 0x7B,
+            "SPACE" => 0x20, "TAB" => 0x09, "ENTER" => 0x0D, "ESC" => 0x1B,
+            "BACKSPACE" => 0x08, "DELETE" => 0x2E, "INSERT" => 0x2D,
+            "HOME" => 0x24, "END" => 0x23, "PGUP" => 0x21, "PGDN" => 0x22,
+            "LEFT" => 0x25, "UP" => 0x26, "RIGHT" => 0x27, "DOWN" => 0x28,
+            _ => (byte)char.ToUpperInvariant(name[0])
+        };
+    }
 
     public void Dispose()
     {

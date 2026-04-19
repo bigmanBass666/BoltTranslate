@@ -43,12 +43,12 @@ public partial class MainWindow : Window
         {
             Icon = CreateIcon(),
             Visible = true,
-            Text = $"TranslateSharp  |  快捷键: {_config.HotkeyModifiers}+{_config.HotkeyKey}"
+            Text = $"TranslateSharp  |  快捷键: {_config.Hotkey}"
         };
 
         var menu = new ContextMenuStrip();
         
-        var statusItem = new ToolStripMenuItem($"快捷键: {_config.HotkeyModifiers}+{_config.HotkeyKey}");
+        var statusItem = new ToolStripMenuItem($"快捷键: {_config.Hotkey}");
         statusItem.Enabled = false;
         menu.Items.Add(statusItem);
         menu.Items.Add(new ToolStripSeparator());
@@ -96,7 +96,7 @@ public partial class MainWindow : Window
         _trayIcon?.ShowBalloonTip(
             2000,
             "TranslateSharp",
-            $"运行中...  快捷键: {_config.HotkeyModifiers}+{_config.HotkeyKey}",
+            $"运行中...  快捷键: {_config.Hotkey}",
             ToolTipIcon.Info);
     }
 

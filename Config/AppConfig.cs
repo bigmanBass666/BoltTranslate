@@ -10,8 +10,7 @@ public class AppConfig
     public string ApiKey { get; set; } = "";
     public string Model { get; set; } = "GLM-4-Flash-250414";
     public string ProxyUrl { get; set; } = "";
-    public string HotkeyModifiers { get; set; } = "Ctrl+Shift";
-    public string HotkeyKey { get; set; } = "T";
+    public string Hotkey { get; set; } = "Ctrl+Shift+T";
 }
 
 public static class ConfigManager
