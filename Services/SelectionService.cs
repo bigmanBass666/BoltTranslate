@@ -63,8 +63,8 @@ public class SelectionService : ISelectionService, IDisposable
 
         var (modifiers, vk, _) = HotkeyParser.Parse(_hotkeyString);
         if (!Win32Api.RegisterHotKey(_hwnd, _hotKeyId, modifiers, vk))
-            throw new InvalidOperationException(
-                $"快捷键注册失败: {_hotkeyString}。可能已被其他软件占用");
+            throw new HotkeyConflictException(
+                $"快捷键 {_hotkeyString} 已被其他软件占用，请在 config.json 中更换快捷键");
     }
 
     private IntPtr WndProc(IntPtr hwnd, int msg, IntPtr wParam, IntPtr lParam, ref bool handled)

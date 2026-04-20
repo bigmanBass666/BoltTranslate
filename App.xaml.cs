@@ -1,5 +1,6 @@
 using System.IO;
 using System.Windows;
+using System.Windows.Forms;
 using TranslateSharp.Config;
 using TranslateSharp.Services;
 using TranslateSharp.Services.NativeInterop;
@@ -14,8 +15,10 @@ public partial class App : System.Windows.Application
     private ITranslationService? _translationService;
     private IWindowManager? _windowManager;
     private ISelectionService? _selectionService;
+    private AutoStartService? _autoStartService;
     private AppConfig _config = null!;
     private string _lastTranslatedText = "";
+    private string? _startupErrorMessage;
 
     protected override void OnStartup(StartupEventArgs e)
     {
@@ -29,6 +32,15 @@ public partial class App : System.Windows.Application
             
             _mainWindow = new MainWindow(_config, _translationService!, _windowManager!, _selectionService!);
             _mainWindow.Show();
+
+            if (!string.IsNullOrEmpty(_startupErrorMessage))
+            {
+                _mainWindow.GetTrayIcon()?.ShowBalloonTip(
+                    5000,
+                    "快捷键冲突",
+                    _startupErrorMessage,
+                    ToolTipIcon.Warning);
+            }
         }
         catch (Exception ex)
         {
@@ -83,7 +95,21 @@ public partial class App : System.Windows.Application
         {
             await HandleTranslateAsync(text, cursorX, cursorY);
         });
-        _selectionService.Start();
+        try
+        {
+            _selectionService.Start();
+        }
+        catch (HotkeyConflictException ex)
+        {
+            _startupErrorMessage = ex.Message;
+        }
+
+        var exePath = Environment.ProcessPath ?? Path.Combine(AppContext.BaseDirectory, "TranslateSharp.exe");
+        _autoStartService = new AutoStartService(exePath);
+        if (_config.AutoStart)
+            _autoStartService.Enable();
+        else
+            _autoStartService.Disable();
     }
 
     private async Task HandleTranslateAsync(string text, double cursorX, double cursorY)
@@ -124,4 +150,7 @@ public partial class App : System.Windows.Application
         });
         proc?.WaitForExit();
     }
+
+    public AutoStartService? GetAutoStartService() => _autoStartService;
+    public MainWindow? GetMainWindow() => _mainWindow;
 }

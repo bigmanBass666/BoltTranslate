@@ -20,6 +20,8 @@ public class AppConfig
 
     public string Hotkey { get; set; } = "Ctrl+Shift+T";
 
+    public bool AutoStart { get; set; }
+
     public string EffectiveHotkey
     {
         get

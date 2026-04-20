@@ -51,7 +51,7 @@ public class TranslationService : ITranslationService
             Timeout = Timeout
         };
 
-        _apiUrl = BuildApiUrl(apiUrl);
+        _apiUrl = apiUrl.Trim();
         _apiKey = apiKey;
         _model = model;
     }
@@ -60,18 +60,6 @@ public class TranslationService : ITranslationService
     {
         _client?.Dispose();
         _client = null;
-    }
-
-    private static string BuildApiUrl(string url)
-    {
-        var trimmed = url.TrimEnd('/');
-        if (trimmed.EndsWith("/chat/completions", StringComparison.OrdinalIgnoreCase))
-            return trimmed;
-        if (trimmed.EndsWith("/v1", StringComparison.OrdinalIgnoreCase) ||
-            trimmed.EndsWith("/v4", StringComparison.OrdinalIgnoreCase) ||
-            trimmed.EndsWith("/paas/v4", StringComparison.OrdinalIgnoreCase))
-            return trimmed + "/chat/completions";
-        return trimmed + "/chat/completions";
     }
 
     public async Task<string> TranslateAsync(string text, CancellationToken ct = default)
