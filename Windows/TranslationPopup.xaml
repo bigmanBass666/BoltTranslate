@@ -21,12 +21,7 @@
             </Grid.RowDefinitions>
             <Border Grid.Row="0" Background="#F5F5F5" CornerRadius="8,8,0,0" MouseLeftButtonDown="OnMouseLeftButtonDown" Cursor="SizeAll">
                 <Grid>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="Auto"/>
-                    </Grid.ColumnDefinitions>
-                    <TextBlock Grid.Column="0" Text="翻译结果" Foreground="#666666" FontSize="12" FontFamily="Microsoft YaHei UI" VerticalAlignment="Center" Padding="10,6,0,4"/>
-                    <TextBlock x:Name="CloseButton" Grid.Column="1" Text="✕" FontSize="13" Foreground="#999999" Cursor="Hand" MouseLeftButtonDown="OnCloseClick" Padding="10,6,10,4" ToolTip="关闭 (Esc)"/>
+                    <TextBlock x:Name="CloseButton" Text="✕" FontSize="13" Foreground="#999999" Cursor="Hand" MouseLeftButtonDown="OnCloseClick" Padding="10,6,10,4" ToolTip="关闭 (Esc)" HorizontalAlignment="Right"/>
                 </Grid>
             </Border>
             <TextBox x:Name="TranslatedTextBox"
@@ -42,7 +37,7 @@
                      FontFamily="Microsoft YaHei UI, Segoe UI, sans-serif"
                      VerticalScrollBarVisibility="Auto"
                      Padding="12,4,12,10"
-                     Cursor="Arrow"/>
+                     Cursor="IBeam"/>
         </Grid>
     </Border>
 </Window>
