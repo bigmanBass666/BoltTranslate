@@ -192,6 +192,11 @@ public partial class App : System.Windows.Application
         return text.Any(c => c >= 0x4E00 && c <= 0x9FFF);
     }
 
+    private static bool IsSingleChineseChar(string text)
+    {
+        return text.Trim().Length == 1 && text.Trim()[0] >= 0x4E00 && text.Trim()[0] <= 0x9FFF;
+    }
+
     private static bool IsSingleWord(string text)
     {
         var word = text.Trim();
@@ -225,8 +230,8 @@ public partial class App : System.Windows.Application
             _windowManager.ShowPopupAtSelection("翻译中...", cursorX, cursorY);
             var details = await _translationService.TranslateWithDetailsAsync(text);
             var result = details.TranslatedText;
-            if (!result.Any(c => char.IsLetter(c) && (c >= 'a' && c <= 'z' || c >= 'A' && c <= 'Z')))
-                result = string.IsNullOrWhiteSpace(text) ? result : $"{text}\n{result}";
+            if (IsSingleChineseChar(text) && !result.Any(c => char.IsLetter(c) && (c >= 'a' && c <= 'z' || c >= 'A' && c <= 'Z')))
+                result = $"{text}\n{result}";
             else if (IsChineseText(text) && IsSingleWord(result) && !result.Contains('['))
             {
                 var phonetic = await GetPhoneticAsync(result);
