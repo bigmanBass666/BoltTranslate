@@ -109,3 +109,37 @@
   - InitServices() 中 _selectionService.Start() 使用 try-catch 捕获 HotkeyConflictException
   - OnStartup() 中检测错误信息，通过托盘气球提示"快捷键冲突"警告
   - 添加 System.Windows.Forms using（ToolTipIcon）
+
+## 2026-04-21
+
+### 已完成
+
+- **翻译历史日志**：
+  - 新增 TranslationLogger.cs，JSONL 格式记录到 logs/YYYY-MM-DD.jsonl
+  - 记录字段：timestamp、source（选中文字）、result（翻译结果）
+  - 集成到 App.xaml.cs HandleTranslateAsync()
+
+- **失焦隐藏窗口**：
+  - 移除 TranslationPopup.xaml 的 CloseButton（X 叉叉）
+  - 移除 TranslationPopup.xaml.cs 的 OnCloseClick 方法
+  - Window 添加 Deactivated="OnDeactivated" 事件，触发 Hide()
+
+- **应用日志系统 AppLogger**：
+  - 新增 Services/AppLogger.cs，静态类，支持 Error/Warning/Info/Debug 多级别
+  - 日志写入 logs/TranslateSharp-{yyyy-MM-dd}.log，UTF-8 无 BOM，自动创建目录
+  - App.xaml.cs OnStartup 最开始初始化，OnExit 记录退出
+  - 全局异常处理器：AppDomain.UnhandledException / DispatcherUnhandledException / TaskScheduler.UnobservedTaskException
+  - MainWindow 构造记录热键信息
+  - CreateTrayIcon 包裹 try-catch 成�败记录
+  - SelectionService.Start() 成功/失败均记录
+  - InitServices/LoadConfig 各步骤详细日志
+  - 修复 WPF 单文件发布 DllNotFoundException：csproj 添加 IncludeNativeLibrariesForSelfExtract=true
+  - 修复 config.json Hotkey 字段被 JSON 序列化为 Unicode 转义（\u002B）的问题
+
+- **翻译提示词优化**：
+  - 明确"用户是哑巴，不要指望用户回应"
+  - 中译英时若结果为单个英文单词，换行显示美式音标 [ˈrɪdər] 格式
+  - 只输出翻译结果及可能的音标，不添加任何解释
+
+- **专注模式去叉**：
+  - TranslationPopup 不再显示关闭按钮，失焦自动隐藏
