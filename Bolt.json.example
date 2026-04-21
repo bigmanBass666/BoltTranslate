@@ -1,0 +1,1 @@
+{"ApiUrl": "https://open.bigmodel.cn/api/paas/v4/chat/completions", "ApiKey": "在此处填入你的API密钥", "Model": "GLM-4-Flash-250414", "ProxyUrl": "", "Hotkey": "Ctrl+Shift+T", "AutoStart": false}
