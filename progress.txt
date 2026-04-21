@@ -208,3 +208,10 @@
   - 配置文件编辑后自动重新加载配置到窗口控件（LoadConfig）
   - 标题栏区域 Cursor="SizeAll"，鼠标悬停时显示移动光标
   - 编译 0 错误 0 警告，应用重启验证通过
+
+- **设置窗口 UI 微调**：
+  - WindowStartupLocation 从 CenterOwner 改为 CenterScreen（屏幕正中央）
+  - 托盘菜单：移除开机自启选项和⚙️图标，改为纯文字"设置"
+  - 标题栏「配置文件」按钮从📄图标改为文字按钮样式（带边框）
+  - 清理 MainWindow 中不再使用的 _autoStartMenuItem 字段和 ToggleAutoStart 方法
+  - 编译 0 错误 0 警告
