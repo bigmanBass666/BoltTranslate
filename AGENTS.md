@@ -16,6 +16,8 @@
 1. `dotnet build` — 验证编译
 2. `dotnet run` — 直接运行最新代码（bin/Debug），无需 publish
 
+⚠️ **每次 build 后必须启动应用验证！** 这是最重要的开发习惯——不启动就不知道改动有没有问题。
+
 **正式发布**（仅在功能验证 OK 后做一次）：
 1. `dotnet publish -r win-x64 --self-contained true -o publish -p:PublishSingleFile=true`
 
