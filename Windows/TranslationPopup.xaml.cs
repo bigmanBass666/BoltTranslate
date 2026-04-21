@@ -32,7 +32,7 @@ public partial class TranslationPopup : Window
             Hide();
     }
 
-    private void OnCloseClick(object sender, MouseButtonEventArgs e)
+    private void OnCloseClick(object sender, RoutedEventArgs e)
     {
         e.Handled = true;
         Hide();

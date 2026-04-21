@@ -10,6 +10,30 @@
         ResizeMode="NoResize"
         KeyDown="OnKeyDown"
         MouseLeftButtonDown="OnTitleBarMouseDown">
+    <Window.Resources>
+        <Style x:Key="TitleBarButton" TargetType="Button">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="Bd" Background="{TemplateBinding Background}" CornerRadius="4" Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Bd" Property="Background" Value="#E0E0E0"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="Bd" Property="Background" Value="#C8C8C8"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Window.Resources>
     <Border x:Name="PopupBorder" CornerRadius="8" Background="#FFFFFFFF" BorderBrush="#0D000000" BorderThickness="1" Cursor="SizeAll">
         <Border.Effect>
             <DropShadowEffect BlurRadius="16" ShadowDepth="3" Opacity="0.15" Color="Black" Direction="270"/>
@@ -26,8 +50,8 @@
                         <ColumnDefinition Width="*"/>
                         <ColumnDefinition Width="Auto"/>
                     </Grid.ColumnDefinitions>
-                    <Button x:Name="CopyButton" Grid.Column="0" Content="📋" FontSize="11" Cursor="Hand" Click="OnCopyClick" Padding="8,4" Background="Transparent" BorderThickness="0" ToolTip="复制翻译结果" VerticalAlignment="Center"/>
-                    <TextBlock x:Name="CloseButton" Grid.Column="2" Text="✕" FontSize="13" Foreground="#999999" Cursor="Hand" MouseLeftButtonDown="OnCloseClick" Padding="10,6,10,4" ToolTip="关闭 (Esc)" VerticalAlignment="Center"/>
+                    <Button x:Name="CopyButton" Grid.Column="0" Content="📋" FontSize="11" Style="{StaticResource TitleBarButton}" Click="OnCopyClick" Padding="8,4" ToolTip="复制翻译结果" VerticalAlignment="Center"/>
+                    <Button x:Name="CloseButton" Grid.Column="2" Content="✕" FontSize="13" Foreground="#999999" Style="{StaticResource TitleBarButton}" Click="OnCloseClick" Padding="10,6,10,4" ToolTip="关闭 (Esc)" VerticalAlignment="Center"/>
                 </Grid>
             </Border>
             <TextBox x:Name="TranslatedTextBox"

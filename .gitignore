@@ -3,5 +3,9 @@ obj/
 *.user
 *.suo
 *.cache
+*.log
+*.tmp
+*.temp
 .vs/
 .trae/
+publish/
