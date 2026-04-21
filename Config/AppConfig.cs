@@ -1,9 +1,9 @@
-using System.IO;
+﻿using System.IO;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using TranslateSharp.Services;
+using BoltTranslate.Services;
 
-namespace TranslateSharp.Config;
+namespace BoltTranslate.Config;
 
 public class AppConfig
 {
@@ -65,26 +65,7 @@ public static class ConfigManager
         var config = JsonSerializer.Deserialize<AppConfig>(json, ReadOptions)
                    ?? new AppConfig();
 
-        if (NeedsMigration(config))
-        {
-            config.Hotkey = config.EffectiveHotkey;
-            Save(config);
-        }
-
-        var normalized = HotkeyParser.NormalizeHotkey(config.EffectiveHotkey);
-        if (config.Hotkey != normalized)
-        {
-            config.Hotkey = normalized;
-            Save(config);
-        }
-
         return config;
-    }
-
-    private static bool NeedsMigration(AppConfig config)
-    {
-        return string.IsNullOrEmpty(config.Hotkey)
-               && (!string.IsNullOrEmpty(config.HotkeyModifiers) || !string.IsNullOrEmpty(config.HotkeyKey));
     }
 
     public static void Save(AppConfig config)
