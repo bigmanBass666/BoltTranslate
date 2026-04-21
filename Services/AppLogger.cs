@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.IO;
 using System.Text;
 
@@ -16,7 +16,7 @@ public static class AppLogger
             Directory.CreateDirectory(_logDir);
         }
 
-        string fileName = $"Bolt-{DateTime.Now:yyyy-MM-dd}.log";
+        string fileName = $"{AppConstants.LogFilePrefix}-{DateTime.Now:yyyy-MM-dd}.log";
         string filePath = Path.Combine(_logDir, fileName);
         string logLine = $"[{DateTime.Now:yyyy-MM-dd HH:mm:ss}] [{level}] {message}";
 

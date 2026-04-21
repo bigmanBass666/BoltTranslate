@@ -2,6 +2,11 @@
 
 internal static class AppConstants
 {
+    public const string AppName = "BoltTranslate";
+    public const string ExeName = "Bolt";
+    public const string ConfigFileName = "Bolt.json";
+    public const string LogFilePrefix = AppName;
+
     public const int PopupOffsetX = 20;
     public const int PopupOffsetY = 20;
     public const double PopupWidth = 400;

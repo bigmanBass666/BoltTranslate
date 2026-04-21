@@ -65,7 +65,7 @@ public class TranslationService : ITranslationService
     public async Task<string> TranslateAsync(string text, CancellationToken ct = default)
     {
         if (!IsConfigured || _client == null)
-            throw new InvalidOperationException("API 未配置，请先在 Bolt.json 中设置 ApiUrl 和 ApiKey");
+            throw new InvalidOperationException("API 未配置，请先在 " + AppConstants.ConfigFileName + " 中设置 ApiUrl 和 ApiKey");
 
         if (string.IsNullOrWhiteSpace(text))
             return "";

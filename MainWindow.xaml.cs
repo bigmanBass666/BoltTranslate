@@ -47,7 +47,7 @@ public partial class MainWindow : Window
             {
                 Icon = CreateIcon(),
                 Visible = true,
-                Text = $"BoltTranslate  |  快捷键: {_config.EffectiveHotkey}"
+                Text = $"{AppConstants.AppName}  |  快捷键: {_config.EffectiveHotkey}"
             };
 
             var menu = new ContextMenuStrip();
@@ -113,14 +113,14 @@ public partial class MainWindow : Window
     {
         _trayIcon?.ShowBalloonTip(
             2000,
-            "BoltTranslate",
+            AppConstants.AppName,
             $"运行中...  快捷键: {_config.EffectiveHotkey}",
             ToolTipIcon.Info);
     }
 
     private void OpenConfigFile()
     {
-        var path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Bolt.json");
+        var path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, AppConstants.ConfigFileName);
         if (!File.Exists(path))
             ConfigManager.Save(_config);
 
@@ -151,7 +151,7 @@ public partial class MainWindow : Window
     private void RestartApplication()
     {
         _trayIcon?.Dispose();
-        var exePath = Environment.ProcessPath ?? Path.Combine(AppContext.BaseDirectory, "Bolt.exe");
+        var exePath = Environment.ProcessPath ?? Path.Combine(AppContext.BaseDirectory, AppConstants.ExeName + ".exe");
         System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
         {
             FileName = exePath,

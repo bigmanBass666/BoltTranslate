@@ -93,8 +93,8 @@ public partial class App : System.Windows.Application
         while (string.IsNullOrWhiteSpace(_config.ApiKey))
         {
             var result = System.Windows.MessageBox.Show(
-                "首次使用请配置 API Key。\n\n是否现在打开 Bolt.json 进行配置？",
-                "BoltTranslate",
+                "首次使用请配置 API Key。\n\n是否现在打开 " + AppConstants.ConfigFileName + " 进行配置？",
+                AppConstants.AppName,
                 MessageBoxButton.YesNo,
                 MessageBoxImage.Question);
 
@@ -105,7 +105,7 @@ public partial class App : System.Windows.Application
             }
             else
             {
-                throw new InvalidOperationException("请在 Bolt.json 中配置 ApiKey 后重启程序");
+                throw new InvalidOperationException("请在 " + AppConstants.ConfigFileName + " 中配置 ApiKey 后重启程序");
             }
         }
     }
@@ -142,7 +142,7 @@ public partial class App : System.Windows.Application
             _startupErrorMessage = ex.Message;
         }
 
-        var exePath = Environment.ProcessPath ?? Path.Combine(AppContext.BaseDirectory, "Bolt.exe");
+        var exePath = Environment.ProcessPath ?? Path.Combine(AppContext.BaseDirectory, AppConstants.ExeName + ".exe");
         _autoStartService = new AutoStartService(exePath);
         if (_config.AutoStart)
             _autoStartService.Enable();
@@ -178,7 +178,7 @@ public partial class App : System.Windows.Application
 
     private static void OpenConfigFileAndWait()
     {
-        var path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Bolt.json");
+        var path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, AppConstants.ConfigFileName);
         if (!File.Exists(path))
         {
             File.WriteAllText(path, System.Text.Json.JsonSerializer.Serialize(

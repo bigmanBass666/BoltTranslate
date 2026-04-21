@@ -37,7 +37,7 @@ public class AppConfig
 public static class ConfigManager
 {
     private static readonly string ConfigPath = Path.Combine(
-        AppDomain.CurrentDomain.BaseDirectory, "Bolt.json");
+        AppDomain.CurrentDomain.BaseDirectory, AppConstants.ConfigFileName);
 
     private static readonly JsonSerializerOptions JsonOptions = new()
     {
