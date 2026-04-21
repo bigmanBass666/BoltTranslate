@@ -2,7 +2,7 @@
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="设置" Width="450" Height="Auto"
-        WindowStartupLocation="CenterOwner"
+        WindowStartupLocation="CenterScreen"
         ResizeMode="NoResize"
         WindowStyle="None"
         AllowsTransparency="True"
@@ -29,7 +29,7 @@
                     <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
                 <TextBlock Grid.Column="0" Text="⚙ 设置" FontSize="18" FontWeight="SemiBold" Foreground="#222222" FontFamily="Microsoft YaHei UI, Segoe UI, sans-serif" VerticalAlignment="Center"/>
-                <Button Grid.Column="1" Content="📄" Background="Transparent" BorderThickness="0" FontSize="14" Cursor="Hand" Width="28" Height="28" VerticalAlignment="Center" ToolTip="打开配置文件" Click="OnOpenConfigFileClick">
+                <Button Grid.Column="1" Content="配置文件" Background="Transparent" BorderBrush="#DDDDDD" BorderThickness="1" FontSize="12" Cursor="Hand" Padding="10,6" VerticalAlignment="Center" Click="OnOpenConfigFileClick">
                     <Button.Style>
                         <Style TargetType="Button">
                             <Setter Property="Template">

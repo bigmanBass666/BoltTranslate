@@ -16,7 +16,6 @@ public partial class MainWindow : Window
     private readonly IWindowManager _windowManager;
     private readonly ISelectionService _selectionService;
     private NotifyIcon? _trayIcon;
-    private ToolStripMenuItem? _autoStartMenuItem;
 
     public MainWindow(AppConfig config, ITranslationService translationService, IWindowManager windowManager, ISelectionService selectionService)
     {
@@ -58,15 +57,9 @@ public partial class MainWindow : Window
             menu.Items.Add(statusItem);
             menu.Items.Add(new ToolStripSeparator());
 
-            _autoStartMenuItem = new ToolStripMenuItem("开机自启")
-            {
-                Checked = _config.AutoStart
-            };
-            _autoStartMenuItem.Click += (_, _) => ToggleAutoStart();
-            menu.Items.Add(_autoStartMenuItem);
             menu.Items.Add(new ToolStripSeparator());
 
-        var settingsItem = new ToolStripMenuItem("⚙️ 设置", null, (_, _) => OpenSettings());
+        var settingsItem = new ToolStripMenuItem("设置", null, (_, _) => OpenSettings());
         menu.Items.Add(settingsItem);
 
         var restartItem = new ToolStripMenuItem("重启", null, (_, _) => RestartApplication());
@@ -161,22 +154,6 @@ public partial class MainWindow : Window
         System.Windows.Application.Current.Shutdown();
     }
 
-    private void ToggleAutoStart()
-    {
-        var app = (App)System.Windows.Application.Current;
-        var autoStartService = app.GetAutoStartService();
-        if (autoStartService == null) return;
-
-        _config.AutoStart = !_config.AutoStart;
-        if (_config.AutoStart)
-            autoStartService.Enable();
-        else
-            autoStartService.Disable();
-
-        ConfigManager.Save(_config);
-        _autoStartMenuItem!.Checked = _config.AutoStart;
-    }
-
     private void OpenSettings()
     {
         try
@@ -186,8 +163,6 @@ public partial class MainWindow : Window
 
             if (result == true)
             {
-                _autoStartMenuItem!.Checked = _config.AutoStart;
-
                 try
                 {
                     _selectionService.ReregisterHotkey(_config.EffectiveHotkey);
