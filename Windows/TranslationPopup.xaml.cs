@@ -1,4 +1,4 @@
-﻿using System.Windows;
+using System.Windows;
 using System.Windows.Input;
 using System.Windows.Interop;
 using BoltTranslate.Services.NativeInterop;
@@ -32,13 +32,15 @@ public partial class TranslationPopup : Window
             Hide();
     }
 
-    private void OnDeactivated(object? sender, EventArgs e)
+    private void OnCloseClick(object sender, MouseButtonEventArgs e)
     {
+        e.Handled = true;
         Hide();
     }
 
     private void OnMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
     {
+        if (e.Source == CloseButton) return;
         DragMove();
     }
 }

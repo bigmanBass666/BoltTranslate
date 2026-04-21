@@ -1,4 +1,4 @@
-﻿<Window x:Class="BoltTranslate.Windows.TranslationPopup"
+<Window x:Class="BoltTranslate.Windows.TranslationPopup"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="翻译结果" Height="Auto" Width="400"
@@ -9,7 +9,6 @@
         ShowInTaskbar="False"
         ResizeMode="NoResize"
         KeyDown="OnKeyDown"
-        Deactivated="OnDeactivated"
         MouseLeftButtonDown="OnMouseLeftButtonDown">
     <Border x:Name="PopupBorder" CornerRadius="8" Background="#FFFFFFFF" BorderBrush="#0D000000" BorderThickness="1" Cursor="SizeAll">
         <Border.Effect>
@@ -17,8 +16,17 @@
         </Border.Effect>
         <Grid>
             <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
                 <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
+            <Grid Grid.Row="0" Background="#F5F5F5" MouseLeftButtonDown="OnMouseLeftButtonDown" Cursor="SizeAll">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <TextBlock Grid.Column="0" Text="翻译结果" Foreground="#666666" FontSize="12" FontFamily="Microsoft YaHei UI" VerticalAlignment="Center" Padding="10,6,0,4"/>
+                <TextBlock x:Name="CloseButton" Grid.Column="1" Text="✕" FontSize="13" Foreground="#999999" Cursor="Hand" MouseLeftButtonDown="OnCloseClick" Padding="10,6,10,4" ToolTip="关闭 (Esc)"/>
+            </Grid>
             <TextBox x:Name="TranslatedTextBox"
                      Grid.Row="1"
                      TextWrapping="Wrap"
