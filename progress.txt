@@ -189,3 +189,8 @@
   - HotkeyConflictException 时弹出警告提示，不回滚其他配置
   - 新增 ApplyAutoStartChange() 辅助方法，统一处理自启状态变更
   - 编译 0 错误 0 警告，应用启动验证通过
+
+- **设置窗口鼠标拖动**：
+  - SettingsWindow.xaml 标题 TextBlock 添加 MouseLeftButtonDown="OnTitleBarMouseDown" 事件绑定
+  - SettingsWindow.xaml.cs 实现 OnTitleBarMouseDown() 方法，调用 DragMove() 实现无边框窗口拖动
+  - 编译 0 错误 0 警告，应用运行正常
