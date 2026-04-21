@@ -5,6 +5,7 @@ using System.Windows;
 using System.Windows.Forms;
 using BoltTranslate.Config;
 using BoltTranslate.Services;
+using BoltTranslate.Windows;
 
 namespace BoltTranslate;
 
@@ -65,7 +66,10 @@ public partial class MainWindow : Window
             menu.Items.Add(_autoStartMenuItem);
             menu.Items.Add(new ToolStripSeparator());
 
-            var openConfigItem = new ToolStripMenuItem("打开配置文件", null, (_, _) => OpenConfigFile());
+        var settingsItem = new ToolStripMenuItem("⚙️ 设置", null, (_, _) => OpenSettings());
+        menu.Items.Add(settingsItem);
+
+        var openConfigItem = new ToolStripMenuItem("打开配置文件", null, (_, _) => OpenConfigFile());
             menu.Items.Add(openConfigItem);
 
             var restartItem = new ToolStripMenuItem("重启", null, (_, _) => RestartApplication());
@@ -174,6 +178,50 @@ public partial class MainWindow : Window
 
         ConfigManager.Save(_config);
         _autoStartMenuItem!.Checked = _config.AutoStart;
+    }
+
+    private void OpenSettings()
+    {
+        try
+        {
+            var settingsWindow = new SettingsWindow(_config);
+            var result = settingsWindow.ShowDialog();
+
+            if (result == true)
+            {
+                _autoStartMenuItem!.Checked = _config.AutoStart;
+
+                try
+                {
+                    _selectionService.ReregisterHotkey(_config.EffectiveHotkey);
+                    _trayIcon!.Text = $"{AppConstants.AppName}  |  快捷键: {_config.EffectiveHotkey}";
+                    AppLogger.Info($"Settings saved, hotkey updated to: {_config.EffectiveHotkey}");
+                }
+                catch (HotkeyConflictException ex)
+                {
+                    System.Windows.MessageBox.Show(ex.Message, "快捷键冲突", MessageBoxButton.OK, MessageBoxImage.Warning);
+                }
+
+                ApplyAutoStartChange();
+            }
+        }
+        catch (Exception ex)
+        {
+            AppLogger.Error(ex, "OpenSettings failed");
+            System.Windows.MessageBox.Show("打开设置窗口失败", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
+        }
+    }
+
+    private void ApplyAutoStartChange()
+    {
+        var app = (App)System.Windows.Application.Current;
+        var autoStartService = app.GetAutoStartService();
+        if (autoStartService == null) return;
+
+        if (_config.AutoStart)
+            autoStartService.Enable();
+        else
+            autoStartService.Disable();
     }
 
     public NotifyIcon? GetTrayIcon() => _trayIcon;
