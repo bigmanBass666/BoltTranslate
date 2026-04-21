@@ -197,8 +197,11 @@ public partial class App : System.Windows.Application
         {
             _windowManager.ShowPopupAtSelection("翻译中...", cursorX, cursorY);
             var details = await _translationService.TranslateWithDetailsAsync(text);
-            TranslationLogger.Log(text, details.TranslatedText, details.Prompt, details.RawResponse);
-            _windowManager.ShowPopupAtSelection(details.TranslatedText, cursorX, cursorY);
+            var result = details.TranslatedText;
+            if (!result.Any(c => char.IsLetter(c) && (c >= 'a' && c <= 'z' || c >= 'A' && c <= 'Z')))
+                result = string.IsNullOrWhiteSpace(text) ? result : $"{text}\n{result}";
+            TranslationLogger.Log(text, result, details.Prompt, details.RawResponse);
+            _windowManager.ShowPopupAtSelection(result, cursorX, cursorY);
         }
         catch (TranslationException ex)
         {
