@@ -88,26 +88,60 @@ public partial class App : System.Windows.Application
     {
         AppLogger.Info("LoadConfig started");
         _config = ConfigManager.Load();
-        AppLogger.Info($"LoadConfig completed, ApiUrl: {_config.ApiUrl}, Model: {_config.Model}, Hotkey: {_config.EffectiveHotkey}, AutoStart: {_config.AutoStart}");
 
+        var configPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, AppConstants.ConfigFileName);
+        var fileExists = File.Exists(configPath);
+        var fileSize = fileExists ? new FileInfo(configPath).Length : 0;
+        var keyPreview = string.IsNullOrWhiteSpace(_config.ApiKey) ? "(empty)" : (_config.ApiKey.Length >= 4 ? _config.ApiKey[..4] + "..." : "(too short)");
+        AppLogger.Info($"Config diagnostics: path={configPath}, exists={fileExists}, size={fileSize}, apiKey={keyPreview}");
+
+        if (string.IsNullOrWhiteSpace(_config.ApiKey))
+            AppLogger.Warning("ApiKey is empty, prompting user for configuration");
+
+        var retryCount = 0;
         while (string.IsNullOrWhiteSpace(_config.ApiKey))
         {
+            retryCount++;
+            AppLogger.Info($"Config retry #{retryCount}");
+
+            var keyLineHint = "";
+            try
+            {
+                var lines = File.ReadAllLines(configPath);
+                for (int i = 0; i < lines.Length; i++)
+                {
+                    if (lines[i].Trim().StartsWith("\"ApiKey\""))
+                    {
+                        keyLineHint = $"\n\n第 {i + 1} 行：{lines[i].Trim()}";
+                        break;
+                    }
+                }
+            }
+            catch { }
+
             var result = System.Windows.MessageBox.Show(
-                "首次使用请配置 API Key。\n\n是否现在打开 " + AppConstants.ConfigFileName + " 进行配置？",
+                "⚠️ 检测到 ApiKey 未配置\n\n" +
+                $"文件：{configPath}\n" +
+                (string.IsNullOrEmpty(keyLineHint) ? "" : keyLineHint) +
+                "\n\n请在上述字段的引号内填入你的密钥，保存后关闭记事本。",
                 AppConstants.AppName,
                 MessageBoxButton.YesNo,
-                MessageBoxImage.Question);
+                MessageBoxImage.Warning);
 
             if (result == MessageBoxResult.Yes)
             {
                 OpenConfigFileAndWait();
                 _config = ConfigManager.Load();
+                keyPreview = string.IsNullOrWhiteSpace(_config.ApiKey) ? "(empty)" : (_config.ApiKey.Length >= 4 ? _config.ApiKey[..4] + "..." : "(too short)");
+                AppLogger.Info($"After edit: apiKey={keyPreview}");
             }
             else
             {
                 throw new InvalidOperationException("请在 " + AppConstants.ConfigFileName + " 中配置 ApiKey 后重启程序");
             }
         }
+
+        AppLogger.Info($"LoadConfig completed, ApiUrl: {_config.ApiUrl}, Model: {_config.Model}, Hotkey: {_config.EffectiveHotkey}, AutoStart: {_config.AutoStart}");
     }
 
     private void InitServices()
@@ -191,6 +225,26 @@ public partial class App : System.Windows.Application
             UseShellExecute = true
         });
         proc?.WaitForExit();
+
+        try
+        {
+            var rawJson = File.ReadAllText(path);
+            if (string.IsNullOrWhiteSpace(rawJson))
+            {
+                AppLogger.Warning("Config file is empty after notepad edit");
+            }
+            else
+            {
+                var options = new System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+                var loaded = System.Text.Json.JsonSerializer.Deserialize<AppConfig>(rawJson, options);
+                var keyOk = !string.IsNullOrWhiteSpace(loaded?.ApiKey);
+                AppLogger.Info($"Notepad closed: fileSize={rawJson.Length}, apiKeyValid={keyOk}");
+            }
+        }
+        catch (Exception ex)
+        {
+            AppLogger.Warning($"Failed to re-read config after notepad edit: {ex.Message}");
+        }
     }
 
     public AutoStartService? GetAutoStartService() => _autoStartService;
