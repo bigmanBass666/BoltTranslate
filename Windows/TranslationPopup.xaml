@@ -9,7 +9,7 @@
         ShowInTaskbar="False"
         ResizeMode="NoResize"
         KeyDown="OnKeyDown"
-        MouseLeftButtonDown="OnMouseLeftButtonDown">
+        MouseLeftButtonDown="OnTitleBarMouseDown">
     <Border x:Name="PopupBorder" CornerRadius="8" Background="#FFFFFFFF" BorderBrush="#0D000000" BorderThickness="1" Cursor="SizeAll">
         <Border.Effect>
             <DropShadowEffect BlurRadius="16" ShadowDepth="3" Opacity="0.15" Color="Black" Direction="270"/>
@@ -19,9 +19,15 @@
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
-            <Border Grid.Row="0" Background="#F5F5F5" CornerRadius="8,8,0,0" MouseLeftButtonDown="OnMouseLeftButtonDown" Cursor="SizeAll">
+            <Border Grid.Row="0" Background="#F5F5F5" CornerRadius="8,8,0,0" MouseLeftButtonDown="OnTitleBarMouseDown" Cursor="SizeAll">
                 <Grid>
-                    <TextBlock x:Name="CloseButton" Text="✕" FontSize="13" Foreground="#999999" Cursor="Hand" MouseLeftButtonDown="OnCloseClick" Padding="10,6,10,4" ToolTip="关闭 (Esc)" HorizontalAlignment="Right"/>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <Button x:Name="CopyButton" Grid.Column="0" Content="📋" FontSize="11" Cursor="Hand" Click="OnCopyClick" Padding="8,4" Background="Transparent" BorderThickness="0" ToolTip="复制翻译结果" VerticalAlignment="Center"/>
+                    <TextBlock x:Name="CloseButton" Grid.Column="2" Text="✕" FontSize="13" Foreground="#999999" Cursor="Hand" MouseLeftButtonDown="OnCloseClick" Padding="10,6,10,4" ToolTip="关闭 (Esc)" VerticalAlignment="Center"/>
                 </Grid>
             </Border>
             <TextBox x:Name="TranslatedTextBox"

@@ -38,9 +38,22 @@ public partial class TranslationPopup : Window
         Hide();
     }
 
-    private void OnMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+    private void OnCopyClick(object sender, RoutedEventArgs e)
     {
-        if (e.Source == CloseButton || e.LeftButton != MouseButtonState.Pressed) return;
-        DragMove();
+        e.Handled = true;
+        if (!string.IsNullOrEmpty(TranslatedTextBox.Text))
+            System.Windows.Clipboard.SetText(TranslatedTextBox.Text);
+    }
+
+    private void OnTitleBarMouseDown(object sender, MouseButtonEventArgs e)
+    {
+        if (e.Source == CloseButton || e.Source == CopyButton) return;
+        if (e.LeftButton == MouseButtonState.Pressed)
+        {
+            if (e.ClickCount == 2)
+                Hide();
+            else
+                DragMove();
+        }
     }
 }
