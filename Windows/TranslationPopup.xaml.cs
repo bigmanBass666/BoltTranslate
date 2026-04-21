@@ -32,14 +32,13 @@ public partial class TranslationPopup : Window
             Hide();
     }
 
-    private void OnCloseClick(object sender, MouseButtonEventArgs e)
+    private void OnDeactivated(object? sender, EventArgs e)
     {
         Hide();
     }
 
     private void OnMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
     {
-        if (e.Source == CloseButton) return;
         DragMove();
     }
 }

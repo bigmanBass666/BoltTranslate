@@ -9,6 +9,7 @@
         ShowInTaskbar="False"
         ResizeMode="NoResize"
         KeyDown="OnKeyDown"
+        Deactivated="OnDeactivated"
         MouseLeftButtonDown="OnMouseLeftButtonDown">
     <Border x:Name="PopupBorder" CornerRadius="8" Background="#FFFFFFFF" BorderBrush="#0D000000" BorderThickness="1" Cursor="SizeAll">
         <Border.Effect>
@@ -16,18 +17,8 @@
         </Border.Effect>
         <Grid>
             <Grid.RowDefinitions>
-                <RowDefinition Height="Auto"/>
                 <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
-            <TextBlock x:Name="CloseButton"
-                       Grid.Row="0"
-                       Text="✕"
-                       FontSize="12"
-                       Foreground="#BBBBBB"
-                       HorizontalAlignment="Right"
-                       Margin="0,8,10,0"
-                       Cursor="Hand"
-                       MouseLeftButtonDown="OnCloseClick"/>
             <TextBox x:Name="TranslatedTextBox"
                      Grid.Row="1"
                      TextWrapping="Wrap"
