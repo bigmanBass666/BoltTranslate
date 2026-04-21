@@ -40,7 +40,7 @@ public partial class TranslationPopup : Window
 
     private void OnMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
     {
-        if (e.Source == CloseButton) return;
+        if (e.Source == CloseButton || e.LeftButton != MouseButtonState.Pressed) return;
         DragMove();
     }
 }
