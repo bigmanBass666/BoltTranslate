@@ -194,3 +194,10 @@
   - SettingsWindow.xaml 标题 TextBlock 添加 MouseLeftButtonDown="OnTitleBarMouseDown" 事件绑定
   - SettingsWindow.xaml.cs 实现 OnTitleBarMouseDown() 方法，调用 DragMove() 实现无边框窗口拖动
   - 编译 0 错误 0 警告，应用运行正常
+
+- **修复快捷键捕获 Alt 键识别 Bug**：
+  - 问题：按下 Alt 组合键时显示 "Ctrl+System+T" 而非 "Ctrl+Alt+T"
+  - 原因：WPF 中 Alt 键的 e.Key 返回 Key.System，真实按键在 e.SystemKey
+  - 修复：OnHotkeyPreviewKeyDown() 添加 Key.System 检测和转换逻辑
+  - 修饰键过滤条件新增 Key.System，防止纯 Alt 键被当作主键
+  - 编译 0 错误 0 警告
