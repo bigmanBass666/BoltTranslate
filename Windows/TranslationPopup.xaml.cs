@@ -42,7 +42,19 @@ public partial class TranslationPopup : Window
     {
         e.Handled = true;
         if (!string.IsNullOrEmpty(TranslatedTextBox.Text))
+        {
             System.Windows.Clipboard.SetText(TranslatedTextBox.Text);
+            CopyButton.Content = "✓";
+            CopyButton.Foreground = System.Windows.Media.Brushes.Green;
+            var timer = new System.Windows.Threading.DispatcherTimer { Interval = TimeSpan.FromMilliseconds(800) };
+            timer.Tick += (s, _) =>
+            {
+                CopyButton.Content = "📋";
+                CopyButton.Foreground = null;
+                timer.Stop();
+            };
+            timer.Start();
+        }
     }
 
     private void OnTitleBarMouseDown(object sender, MouseButtonEventArgs e)
