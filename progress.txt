@@ -98,3 +98,14 @@
   - HotkeyService.cs / SelectionService.cs 构造函数改用 config.EffectiveHotkey
   - 修复 AppConfig.Load() 中局部变量名冲突（config → defaultConfig）
   - 编译 0 错误 0 警告
+
+- **开机自启菜单项**：
+  - MainWindow.xaml.cs 添加 _autoStartMenuItem 字段和 ToggleAutoStart() 方法
+  - 托盘菜单"打开配置文件"前新增"开机自启"选项，状态与 config.AutoStart 同步
+  - 点击切换自启状态，调用 AutoStartService.Enable()/Disable()，保存配置并更新菜单勾选
+
+- **快捷键冲突提示**：
+  - App.xaml.cs 添加 _startupErrorMessage 字段
+  - InitServices() 中 _selectionService.Start() 使用 try-catch 捕获 HotkeyConflictException
+  - OnStartup() 中检测错误信息，通过托盘气球提示"快捷键冲突"警告
+  - 添加 System.Windows.Forms using（ToolTipIcon）

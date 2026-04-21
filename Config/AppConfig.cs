@@ -60,7 +60,8 @@ public static class ConfigManager
             return defaultConfig;
         }
 
-        var json = File.ReadAllText(ConfigPath);
+        using var reader = new System.IO.StreamReader(ConfigPath, true);
+        var json = reader.ReadToEnd();
         var config = JsonSerializer.Deserialize<AppConfig>(json, ReadOptions)
                    ?? new AppConfig();
 
@@ -89,6 +90,6 @@ public static class ConfigManager
     public static void Save(AppConfig config)
     {
         var json = JsonSerializer.Serialize(config, JsonOptions);
-        File.WriteAllText(ConfigPath, json);
+        File.WriteAllText(ConfigPath, json, new System.Text.UTF8Encoding(false));
     }
 }

@@ -75,7 +75,7 @@ public class TranslationService : ITranslationService
             model = _model,
             messages = new[]
             {
-                new { role = "system", content = "你是一个翻译助手。将用户输入的英文文本翻译为中文。只输出翻译结果，不要添加任何解释、注释或额外内容。" },
+                new { role = "system", content = AppConstants.TranslationSystemPrompt },
                 new { role = "user", content = text }
             },
             temperature = AppConstants.TranslationTemperature,

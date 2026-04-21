@@ -9,8 +9,6 @@ namespace TranslateSharp;
 
 public partial class App : System.Windows.Application
 {
-    private const string SystemPrompt = "你是一个翻译助手。将用户输入的英文文本翻译为中文。只输出翻译结果，不要添加任何解释、注释或额外内容。";
-
     private MainWindow? _mainWindow;
     private ITranslationService? _translationService;
     private IWindowManager? _windowManager;
@@ -122,6 +120,7 @@ public partial class App : System.Windows.Application
         {
             _windowManager.ShowPopupAtSelection("翻译中...", cursorX, cursorY);
             var result = await _translationService.TranslateAsync(text);
+            TranslationLogger.Log(text, result);
             _windowManager.ShowPopupAtSelection(result, cursorX, cursorY);
         }
         catch (TranslationException ex)
