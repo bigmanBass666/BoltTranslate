@@ -1,8 +1,11 @@
+using System.Diagnostics;
+using System.IO;
 using System.Text;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using BoltTranslate.Config;
+using BoltTranslate.Services;
 
 namespace BoltTranslate.Windows;
 
@@ -155,5 +158,29 @@ public partial class SettingsWindow : Window
     {
         if (e.ButtonState == MouseButtonState.Pressed)
             DragMove();
+    }
+
+    private void OnOpenConfigFileClick(object sender, RoutedEventArgs e)
+    {
+        var path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, AppConstants.ConfigFileName);
+        if (!File.Exists(path))
+            ConfigManager.Save(_config);
+
+        var contentBefore = File.Exists(path) ? File.ReadAllText(path) : "";
+
+        using var proc = Process.Start(new ProcessStartInfo
+        {
+            FileName = "notepad.exe",
+            Arguments = $"\"{path}\"",
+            UseShellExecute = true
+        });
+
+        if (proc != null)
+        {
+            proc.WaitForExit();
+            var contentAfter = File.Exists(path) ? File.ReadAllText(path) : "";
+            if (contentAfter != contentBefore)
+                LoadConfig();
+        }
     }
 }

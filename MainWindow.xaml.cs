@@ -69,10 +69,7 @@ public partial class MainWindow : Window
         var settingsItem = new ToolStripMenuItem("⚙️ 设置", null, (_, _) => OpenSettings());
         menu.Items.Add(settingsItem);
 
-        var openConfigItem = new ToolStripMenuItem("打开配置文件", null, (_, _) => OpenConfigFile());
-            menu.Items.Add(openConfigItem);
-
-            var restartItem = new ToolStripMenuItem("重启", null, (_, _) => RestartApplication());
+        var restartItem = new ToolStripMenuItem("重启", null, (_, _) => RestartApplication());
             menu.Items.Add(restartItem);
 
             var exitItem = new ToolStripMenuItem("退出", null, (_, _) => ExitApplication());
