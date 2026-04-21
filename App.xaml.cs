@@ -187,6 +187,33 @@ public partial class App : System.Windows.Application
         AppLogger.Info("InitServices completed");
     }
 
+    private static bool IsChineseText(string text)
+    {
+        return text.Any(c => c >= 0x4E00 && c <= 0x9FFF);
+    }
+
+    private static bool IsSingleWord(string text)
+    {
+        var word = text.Trim();
+        return !word.Contains(' ') && !word.Contains('\n') && !word.Contains('\r');
+    }
+
+    private async Task<string> GetPhoneticAsync(string word)
+    {
+        if (_translationService == null) return "";
+        try
+        {
+            var result = await _translationService.TranslateAsync(
+                $"请给出单词 \"{word}\" 的美式音标，只返回音标，格式如：[ˈwɜːrd]，不要任何其他内容。");
+            var match = System.Text.RegularExpressions.Regex.Match(result, @"\[[^\]]+\]");
+            return match.Success ? match.Value : "";
+        }
+        catch
+        {
+            return "";
+        }
+    }
+
     private async Task HandleTranslateAsync(string text, double cursorX, double cursorY)
     {
         if (_translationService == null || _windowManager == null) return;
@@ -200,6 +227,12 @@ public partial class App : System.Windows.Application
             var result = details.TranslatedText;
             if (!result.Any(c => char.IsLetter(c) && (c >= 'a' && c <= 'z' || c >= 'A' && c <= 'Z')))
                 result = string.IsNullOrWhiteSpace(text) ? result : $"{text}\n{result}";
+            else if (IsChineseText(text) && IsSingleWord(result) && !result.Contains('['))
+            {
+                var phonetic = await GetPhoneticAsync(result);
+                if (!string.IsNullOrEmpty(phonetic))
+                    result = $"{result}\n{phonetic}";
+            }
             TranslationLogger.Log(text, result, details.Prompt, details.RawResponse);
             _windowManager.ShowPopupAtSelection(result, cursorX, cursorY);
         }
