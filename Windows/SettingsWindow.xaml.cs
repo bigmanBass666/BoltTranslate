@@ -73,10 +73,16 @@ public partial class SettingsWindow : Window
         var modifiers = Keyboard.Modifiers;
         var key = e.Key;
 
+        if (key == Key.System)
+        {
+            key = e.SystemKey;
+        }
+
         if (key == Key.LeftCtrl || key == Key.RightCtrl ||
             key == Key.LeftShift || key == Key.RightShift ||
             key == Key.LeftAlt || key == Key.RightAlt ||
-            key == Key.LWin || key == Key.RWin)
+            key == Key.LWin || key == Key.RWin ||
+            key == Key.System)
             return;
 
         var sb = new StringBuilder();
@@ -143,5 +149,11 @@ public partial class SettingsWindow : Window
     {
         DialogResult = false;
         Close();
+    }
+
+    private void OnTitleBarMouseDown(object sender, MouseButtonEventArgs e)
+    {
+        if (e.ButtonState == MouseButtonState.Pressed)
+            DragMove();
     }
 }

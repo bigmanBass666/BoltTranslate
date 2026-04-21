@@ -10,13 +10,14 @@ public interface ISelectionService
     void RegisterHotkey(Action<string, double, double> onTranslateRequested);
     void Start();
     void Stop();
+    void ReregisterHotkey(string newHotkey);
 }
 
 public class SelectionService : ISelectionService, IDisposable
 {
     private Action<string, double, double>? _onTranslateRequested;
     private readonly ITextSelectionService _textSelectionService;
-    private readonly string _hotkeyString;
+    private string _hotkeyString;
     private IntPtr _hwnd;
     private HwndSource? _hwndSource;
     private readonly int _hotKeyId = 0x9001;
@@ -65,6 +66,25 @@ public class SelectionService : ISelectionService, IDisposable
         _hwndSource?.Dispose();
         _hwndSource = null;
         _isRunning = false;
+    }
+
+    public void ReregisterHotkey(string newHotkey)
+    {
+        if (newHotkey == _hotkeyString) return;
+
+        var oldHotkey = _hotkeyString;
+        if (_isRunning)
+        {
+            Stop();
+            _hotkeyString = newHotkey;
+            Start();
+        }
+        else
+        {
+            _hotkeyString = newHotkey;
+        }
+
+        AppLogger.Info($"Hotkey reregistered: {oldHotkey} -> {newHotkey}");
     }
 
     private void EnsureWindow(WindowInteropHelper helper)
