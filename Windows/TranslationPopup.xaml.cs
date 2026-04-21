@@ -50,7 +50,7 @@ public partial class TranslationPopup : Window
             timer.Tick += (s, _) =>
             {
                 CopyButton.Content = "📋";
-                CopyButton.Foreground = null;
+                CopyButton.Foreground = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(0x33, 0x33, 0x33));
                 timer.Stop();
             };
             timer.Start();
