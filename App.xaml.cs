@@ -232,6 +232,12 @@ public partial class App : System.Windows.Application
             var result = details.TranslatedText;
             if (IsSingleChineseChar(text) && !result.Any(c => char.IsLetter(c) && (c >= 'a' && c <= 'z' || c >= 'A' && c <= 'Z')))
                 result = $"{text}\n{result}";
+            else if (!IsChineseText(text) && !result.Any(c => c >= 0x4E00 && c <= 0x9FFF))
+            {
+                details = await _translationService.TranslateWithDetailsAsync(
+                    $"请将以下英文翻译为中文，只输出翻译结果，不要任何其他内容：{text}");
+                result = details.TranslatedText;
+            }
             else if (IsChineseText(text) && IsSingleWord(result) && !result.Contains('['))
             {
                 var phonetic = await GetPhoneticAsync(result);
