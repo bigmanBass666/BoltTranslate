@@ -20,15 +20,21 @@ public partial class App : System.Windows.Application
 
     protected override void OnStartup(StartupEventArgs e)
     {
+        AppLogger.Info("Application starting...");
+
         base.OnStartup(e);
         Win32Api.FreeConsole();
+
+        SetupExceptionHandlers();
 
         try
         {
             LoadConfig();
             InitServices();
             
+            AppLogger.Info("Creating MainWindow...");
             _mainWindow = new MainWindow(_config, _translationService!, _windowManager!, _selectionService!);
+            AppLogger.Info("MainWindow created");
             _mainWindow.Show();
 
             if (!string.IsNullOrEmpty(_startupErrorMessage))
@@ -49,14 +55,40 @@ public partial class App : System.Windows.Application
 
     protected override void OnExit(ExitEventArgs e)
     {
+        AppLogger.Info("Application exiting...");
         _selectionService?.Stop();
         _translationService?.Dispose();
         base.OnExit(e);
     }
 
+    private void SetupExceptionHandlers()
+    {
+        AppDomain.CurrentDomain.UnhandledException += (_, args) =>
+        {
+            if (args.ExceptionObject is Exception ex)
+                AppLogger.Error(ex, "Unhandled domain exception");
+        };
+
+        DispatcherUnhandledException += (_, args) =>
+        {
+            AppLogger.Error(args.Exception, "Unhandled dispatcher exception");
+            args.Handled = true;
+        };
+
+        TaskScheduler.UnobservedTaskException += (_, args) =>
+        {
+            AppLogger.Error(args.Exception, "Unobserved task exception");
+            args.SetObserved();
+        };
+
+        AppLogger.Info("Exception handlers registered");
+    }
+
     private void LoadConfig()
     {
+        AppLogger.Info("LoadConfig started");
         _config = ConfigManager.Load();
+        AppLogger.Info($"LoadConfig completed, ApiUrl: {_config.ApiUrl}, Model: {_config.Model}, Hotkey: {_config.EffectiveHotkey}, AutoStart: {_config.AutoStart}");
 
         while (string.IsNullOrWhiteSpace(_config.ApiKey))
         {
@@ -80,10 +112,14 @@ public partial class App : System.Windows.Application
 
     private void InitServices()
     {
+        AppLogger.Info("InitServices started");
+
         _translationService = new TranslationService();
         _translationService.Configure(_config.ApiUrl, _config.ApiKey, _config.Model, _config.ProxyUrl);
+        AppLogger.Info("TranslationService configured");
 
         _windowManager = new WindowManager();
+        AppLogger.Info("WindowManager created");
 
         var clipboardService = new ClipboardService();
         var textSelectionService = new TextSelectionService(clipboardService);
@@ -93,12 +129,16 @@ public partial class App : System.Windows.Application
         {
             await HandleTranslateAsync(text, cursorX, cursorY);
         });
+        AppLogger.Info("SelectionService created and hotkey registered");
+
         try
         {
             _selectionService.Start();
+            AppLogger.Info("SelectionService.Start() succeeded");
         }
         catch (HotkeyConflictException ex)
         {
+            AppLogger.Warning($"SelectionService.Start() failed: {ex.Message}");
             _startupErrorMessage = ex.Message;
         }
 
@@ -108,6 +148,9 @@ public partial class App : System.Windows.Application
             _autoStartService.Enable();
         else
             _autoStartService.Disable();
+        AppLogger.Info("AutoStartService configured");
+
+        AppLogger.Info("InitServices completed");
     }
 
     private async Task HandleTranslateAsync(string text, double cursorX, double cursorY)

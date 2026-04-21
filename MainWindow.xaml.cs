@@ -24,6 +24,7 @@ public partial class MainWindow : Window
         _windowManager = windowManager;
         _selectionService = selectionService;
         InitializeComponent();
+        AppLogger.Info($"MainWindow created, Hotkey: {_config.EffectiveHotkey}");
     }
 
     private void OnLoaded(object sender, RoutedEventArgs e)
@@ -40,39 +41,47 @@ public partial class MainWindow : Window
 
     private void CreateTrayIcon()
     {
-        _trayIcon = new NotifyIcon
+        try
         {
-            Icon = CreateIcon(),
-            Visible = true,
-            Text = $"TranslateSharp  |  快捷键: {_config.EffectiveHotkey}"
-        };
+            _trayIcon = new NotifyIcon
+            {
+                Icon = CreateIcon(),
+                Visible = true,
+                Text = $"TranslateSharp  |  快捷键: {_config.EffectiveHotkey}"
+            };
 
-        var menu = new ContextMenuStrip();
-        
-        var statusItem = new ToolStripMenuItem($"快捷键: {_config.EffectiveHotkey}");
-        statusItem.Enabled = false;
-        menu.Items.Add(statusItem);
-        menu.Items.Add(new ToolStripSeparator());
-        
-        _autoStartMenuItem = new ToolStripMenuItem("开机自启")
+            var menu = new ContextMenuStrip();
+
+            var statusItem = new ToolStripMenuItem($"快捷键: {_config.EffectiveHotkey}");
+            statusItem.Enabled = false;
+            menu.Items.Add(statusItem);
+            menu.Items.Add(new ToolStripSeparator());
+
+            _autoStartMenuItem = new ToolStripMenuItem("开机自启")
+            {
+                Checked = _config.AutoStart
+            };
+            _autoStartMenuItem.Click += (_, _) => ToggleAutoStart();
+            menu.Items.Add(_autoStartMenuItem);
+            menu.Items.Add(new ToolStripSeparator());
+
+            var openConfigItem = new ToolStripMenuItem("打开配置文件", null, (_, _) => OpenConfigFile());
+            menu.Items.Add(openConfigItem);
+
+            var restartItem = new ToolStripMenuItem("重启", null, (_, _) => RestartApplication());
+            menu.Items.Add(restartItem);
+
+            var exitItem = new ToolStripMenuItem("退出", null, (_, _) => ExitApplication());
+            menu.Items.Add(exitItem);
+
+            _trayIcon.ContextMenuStrip = menu;
+            _trayIcon.DoubleClick += (_, _) => ShowStatusBalloon();
+            AppLogger.Info("Tray icon created successfully");
+        }
+        catch (Exception ex)
         {
-            Checked = _config.AutoStart
-        };
-        _autoStartMenuItem.Click += (_, _) => ToggleAutoStart();
-        menu.Items.Add(_autoStartMenuItem);
-        menu.Items.Add(new ToolStripSeparator());
-
-        var openConfigItem = new ToolStripMenuItem("打开配置文件", null, (_, _) => OpenConfigFile());
-        menu.Items.Add(openConfigItem);
-
-        var restartItem = new ToolStripMenuItem("重启", null, (_, _) => RestartApplication());
-        menu.Items.Add(restartItem);
-
-        var exitItem = new ToolStripMenuItem("退出", null, (_, _) => ExitApplication());
-        menu.Items.Add(exitItem);
-
-        _trayIcon.ContextMenuStrip = menu;
-        _trayIcon.DoubleClick += (_, _) => ShowStatusBalloon();
+            AppLogger.Error(ex, "CreateTrayIcon failed");
+        }
     }
 
     private static Icon CreateIcon()

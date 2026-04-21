@@ -37,11 +37,24 @@ public class SelectionService : ISelectionService, IDisposable
 
     public void Start()
     {
-        if (_isRunning) return;
+        if (_isRunning)
+        {
+            AppLogger.Warning("SelectionService.Start() called but already running");
+            return;
+        }
 
-        var helper = new WindowInteropHelper(new Window { Visibility = Visibility.Hidden });
-        EnsureWindow(helper);
-        _isRunning = true;
+        try
+        {
+            var helper = new WindowInteropHelper(new Window { Visibility = Visibility.Hidden });
+            EnsureWindow(helper);
+            _isRunning = true;
+            AppLogger.Info($"SelectionService started, hotkey: {_hotkeyString}");
+        }
+        catch (Exception ex)
+        {
+            AppLogger.Error(ex, "SelectionService.Start() failed");
+            throw;
+        }
     }
 
     public void Stop()
