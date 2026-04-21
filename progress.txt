@@ -181,3 +181,11 @@
   - Esc 键关闭、保存/取消按钮（DialogResult 模式）
   - LoadConfig()/SaveConfig() 与 ConfigManager 集成
   - 编译 0 错误 0 警告
+
+- **托盘菜单集成设置窗口入口**：
+  - MainWindow.xaml.cs 托盘右键菜单新增「⚙️ 设置」菜单项（位于「打开配置文件」之前）
+  - 新增 OpenSettings() 方法：打开 SettingsWindow 模态对话框
+  - 保存后自动更新开机自启菜单状态、重注册热键、更新托盘提示文字
+  - HotkeyConflictException 时弹出警告提示，不回滚其他配置
+  - 新增 ApplyAutoStartChange() 辅助方法，统一处理自启状态变更
+  - 编译 0 错误 0 警告，应用启动验证通过
