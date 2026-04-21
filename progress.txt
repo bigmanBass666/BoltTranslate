@@ -143,3 +143,14 @@
 
 - **专注模式去叉**：
   - TranslationPopup 不再显示关闭按钮，失焦自动隐藏
+
+### 2026-04-21 (续)
+
+### 已完成
+
+- **修复配置保存后仍提示配置 API Key**：
+  - 移除 ConfigManager.Load() 中的自动保存逻辑（NormalizeHotkey 比较后 Save()）
+  - 该逻辑可能导致配置无法正确持久化
+  - 保留 StreamReader(detectEncodingFromByteOrderMarks=true) 自动跳过 BOM
+  - 保留 UTF8Encoding(false) 不带 BOM 保存
+  - 编译 0 错误 0 警告
