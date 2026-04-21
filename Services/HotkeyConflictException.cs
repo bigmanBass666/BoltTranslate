@@ -1,6 +1,6 @@
-using System;
+﻿using System;
 
-namespace TranslateSharp.Services;
+namespace BoltTranslate.Services;
 
 public class HotkeyConflictException : Exception
 {

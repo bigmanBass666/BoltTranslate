@@ -1,9 +1,9 @@
-using System.Windows;
+﻿using System.Windows;
 using System.Windows.Interop;
-using TranslateSharp.Config;
-using TranslateSharp.Services.NativeInterop;
+using BoltTranslate.Config;
+using BoltTranslate.Services.NativeInterop;
 
-namespace TranslateSharp.Services;
+namespace BoltTranslate.Services;
 
 public interface IHotkeyService
 {

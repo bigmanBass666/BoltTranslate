@@ -1,8 +1,8 @@
-using System.Threading;
+﻿using System.Threading;
 using System.Windows.Forms;
-using TranslateSharp.Services.NativeInterop;
+using BoltTranslate.Services.NativeInterop;
 
-namespace TranslateSharp.Services;
+namespace BoltTranslate.Services;
 
 public interface IClipboardService
 {

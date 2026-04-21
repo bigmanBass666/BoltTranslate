@@ -1,4 +1,4 @@
-﻿using System.IO;
+using System.IO;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using BoltTranslate.Services;
@@ -37,7 +37,7 @@ public class AppConfig
 public static class ConfigManager
 {
     private static readonly string ConfigPath = Path.Combine(
-        AppDomain.CurrentDomain.BaseDirectory, "config.json");
+        AppDomain.CurrentDomain.BaseDirectory, "Bolt.json");
 
     private static readonly JsonSerializerOptions JsonOptions = new()
     {

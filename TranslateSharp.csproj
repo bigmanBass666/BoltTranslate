@@ -12,6 +12,8 @@
     <SelfContained>true</SelfContained>
     <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
     <RuntimeIdentifier>win-x64</RuntimeIdentifier>
+    <AssemblyName>Bolt</AssemblyName>
+    <Product>BoltTranslate</Product>
   </PropertyGroup>
 
 </Project>

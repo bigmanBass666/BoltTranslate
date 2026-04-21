@@ -1,6 +1,6 @@
-using TranslateSharp.Services.NativeInterop;
+﻿using BoltTranslate.Services.NativeInterop;
 
-namespace TranslateSharp.Services;
+namespace BoltTranslate.Services;
 
 internal static class HotkeyParser
 {

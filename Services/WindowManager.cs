@@ -1,9 +1,9 @@
-using System.Runtime.InteropServices;
+﻿using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Interop;
-using TranslateSharp.Windows;
+using BoltTranslate.Windows;
 
-namespace TranslateSharp.Services;
+namespace BoltTranslate.Services;
 
 public interface IWindowManager
 {

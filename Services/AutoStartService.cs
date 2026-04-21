@@ -1,11 +1,11 @@
-using Microsoft.Win32;
+﻿using Microsoft.Win32;
 
-namespace TranslateSharp.Services;
+namespace BoltTranslate.Services;
 
 public class AutoStartService
 {
     private const string RunKeyPath = @"Software\Microsoft\Windows\CurrentVersion\Run";
-    private const string ValueName = "TranslateSharp";
+    private const string ValueName = "BoltTranslate";
     private readonly string _exePath;
 
     public AutoStartService(string exePath)

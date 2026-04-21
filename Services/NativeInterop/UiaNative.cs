@@ -1,6 +1,6 @@
-using System.Runtime.InteropServices;
+﻿using System.Runtime.InteropServices;
 
-namespace TranslateSharp.Services.NativeInterop;
+namespace BoltTranslate.Services.NativeInterop;
 
 internal static class UiaNative
 {

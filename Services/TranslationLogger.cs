@@ -1,7 +1,7 @@
-using System.IO;
+﻿using System.IO;
 using System.Text.Json;
 
-namespace TranslateSharp.Services
+namespace BoltTranslate.Services
 {
     public static class TranslationLogger
     {

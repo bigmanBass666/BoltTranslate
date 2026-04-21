@@ -1,9 +1,9 @@
 using System.Windows;
 using System.Windows.Interop;
-using TranslateSharp.Config;
-using TranslateSharp.Services.NativeInterop;
+using BoltTranslate.Config;
+using BoltTranslate.Services.NativeInterop;
 
-namespace TranslateSharp.Services;
+namespace BoltTranslate.Services;
 
 public interface ISelectionService
 {
@@ -77,7 +77,7 @@ public class SelectionService : ISelectionService, IDisposable
         var (modifiers, vk, _) = HotkeyParser.Parse(_hotkeyString);
         if (!Win32Api.RegisterHotKey(_hwnd, _hotKeyId, modifiers, vk))
             throw new HotkeyConflictException(
-                $"快捷键 {_hotkeyString} 已被其他软件占用，请在 config.json 中更换快捷键");
+                $"快捷键 {_hotkeyString} 已被其他软件占用，请在 Bolt.json 中更换快捷键");
     }
 
     private IntPtr WndProc(IntPtr hwnd, int msg, IntPtr wParam, IntPtr lParam, ref bool handled)

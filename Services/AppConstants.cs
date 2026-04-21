@@ -1,4 +1,4 @@
-namespace TranslateSharp.Services;
+﻿namespace BoltTranslate.Services;
 
 internal static class AppConstants
 {

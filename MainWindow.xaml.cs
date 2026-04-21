@@ -3,10 +3,10 @@ using System.Drawing.Drawing2D;
 using System.IO;
 using System.Windows;
 using System.Windows.Forms;
-using TranslateSharp.Config;
-using TranslateSharp.Services;
+using BoltTranslate.Config;
+using BoltTranslate.Services;
 
-namespace TranslateSharp;
+namespace BoltTranslate;
 
 public partial class MainWindow : Window
 {
@@ -47,7 +47,7 @@ public partial class MainWindow : Window
             {
                 Icon = CreateIcon(),
                 Visible = true,
-                Text = $"TranslateSharp  |  快捷键: {_config.EffectiveHotkey}"
+                Text = $"BoltTranslate  |  快捷键: {_config.EffectiveHotkey}"
             };
 
             var menu = new ContextMenuStrip();
@@ -113,14 +113,14 @@ public partial class MainWindow : Window
     {
         _trayIcon?.ShowBalloonTip(
             2000,
-            "TranslateSharp",
+            "BoltTranslate",
             $"运行中...  快捷键: {_config.EffectiveHotkey}",
             ToolTipIcon.Info);
     }
 
     private void OpenConfigFile()
     {
-        var path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "config.json");
+        var path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Bolt.json");
         if (!File.Exists(path))
             ConfigManager.Save(_config);
 
@@ -151,7 +151,7 @@ public partial class MainWindow : Window
     private void RestartApplication()
     {
         _trayIcon?.Dispose();
-        var exePath = Environment.ProcessPath ?? Path.Combine(AppContext.BaseDirectory, "TranslateSharp.exe");
+        var exePath = Environment.ProcessPath ?? Path.Combine(AppContext.BaseDirectory, "Bolt.exe");
         System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
         {
             FileName = exePath,

@@ -49,7 +49,7 @@
   - 更新 WindowManager.cs：移除本地常量，使用 AppConstants
   - 更新 HotkeyService.cs：热键冷却时间引用 AppConstants
   - 更新 ClipboardService.cs：所有延迟、轮询次数、超时时间引用 AppConstants
-  - 更新 TranslationService.cs：系统提示词、温度、最大 token、超时时间引用 AppConstants
+  - 更新 TranslationService.cs：系统提示词，温度、最大 token、超时时间引用 AppConstants
   - 编译 0 错误，3 个原有警告（与本次修改无关）
 - **Win32 API 集中管理**：
   - 创建 Services/NativeInterop/Win32Api.cs 集中所有 P/Invoke 声明
@@ -130,7 +130,7 @@
   - App.xaml.cs OnStartup 最开始初始化，OnExit 记录退出
   - 全局异常处理器：AppDomain.UnhandledException / DispatcherUnhandledException / TaskScheduler.UnobservedTaskException
   - MainWindow 构造记录热键信息
-  - CreateTrayIcon 包裹 try-catch 成�败记录
+  - CreateTrayIcon 包裹 try-catch 成败记录
   - SelectionService.Start() 成功/失败均记录
   - InitServices/LoadConfig 各步骤详细日志
   - 修复 WPF 单文件发布 DllNotFoundException：csproj 添加 IncludeNativeLibrariesForSelfExtract=true
@@ -154,3 +154,16 @@
   - 保留 StreamReader(detectEncodingFromByteOrderMarks=true) 自动跳过 BOM
   - 保留 UTF8Encoding(false) 不带 BOM 保存
   - 编译 0 错误 0 警告
+
+## 2026-04-21 (命名)
+
+### 已完成
+
+- **项目重命名 BoltTranslate**：
+  - 产品名 BoltTranslate，exe 名 Bolt.exe，配置文件 Bolt.json
+  - csproj：AssemblyName=Bolt，Product=BoltTranslate
+  - 命名空间：TranslateSharp → BoltTranslate（18个文件）
+  - UI 文字：托盘/气泡/标题全部从 TranslateSharp 改为 BoltTranslate
+  - 日志文件名：Bolt-{date}.log
+  - 注册表项：TranslateSharp → Bolt
+  - 编译 0 错误 0 警告，publish/Bolt.exe 运行正常

@@ -2,9 +2,9 @@ using System.Net;
 using System.Net.Http;
 using System.Text;
 using System.Text.Json;
-using TranslateSharp.Config;
+using BoltTranslate.Config;
 
-namespace TranslateSharp.Services;
+namespace BoltTranslate.Services;
 
 public interface ITranslationService : IDisposable
 {
@@ -65,7 +65,7 @@ public class TranslationService : ITranslationService
     public async Task<string> TranslateAsync(string text, CancellationToken ct = default)
     {
         if (!IsConfigured || _client == null)
-            throw new InvalidOperationException("API 未配置，请先在 config.json 中设置 ApiUrl 和 ApiKey");
+            throw new InvalidOperationException("API 未配置，请先在 Bolt.json 中设置 ApiUrl 和 ApiKey");
 
         if (string.IsNullOrWhiteSpace(text))
             return "";

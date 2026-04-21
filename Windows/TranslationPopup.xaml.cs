@@ -1,9 +1,9 @@
-using System.Windows;
+﻿using System.Windows;
 using System.Windows.Input;
 using System.Windows.Interop;
-using TranslateSharp.Services.NativeInterop;
+using BoltTranslate.Services.NativeInterop;
 
-namespace TranslateSharp.Windows;
+namespace BoltTranslate.Windows;
 
 public partial class TranslationPopup : Window
 {
