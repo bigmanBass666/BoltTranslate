@@ -1,10 +1,18 @@
 using System.IO;
+using System.Text;
+using System.Text.Encodings.Web;
 using System.Text.Json;
 
 namespace BoltTranslate.Services;
 
 public static class TranslationLogger
 {
+    private static readonly JsonSerializerOptions JsonOptions = new()
+    {
+        Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
+        WriteIndented = false
+    };
+
     public static void Log(string source, string result, string? prompt = null, string? rawResponse = null)
     {
         try
@@ -21,7 +29,7 @@ public static class TranslationLogger
                 prompt = prompt ?? "",
                 rawResponse = rawResponse ?? ""
             };
-            var line = JsonSerializer.Serialize(entry, new JsonSerializerOptions { WriteIndented = false }) + Environment.NewLine;
+            var line = JsonSerializer.Serialize(entry, JsonOptions) + Environment.NewLine;
             File.AppendAllText(filePath, line);
         }
         catch
