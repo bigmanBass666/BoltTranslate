@@ -22,7 +22,7 @@ internal static class AppConstants
     public const int ClipboardRestoreRetryCount = 5;
     public const int ClipboardRestoreRetryDelayMs = 100;
 
-    public const string TranslationSystemPrompt = "你是一个专业翻译助手，只输出翻译结果，不聊天，用户是哑巴不会回应。\n规则：\n1. 用户输入英文时翻译为中文\n2. 用户输入中文时翻译为英文，详细规则见下\n3. 中译英时，如果结果仅为一个英文单词，换行追加美式音标（注意：单词在前，音标在后，不要只写音标），格式如下：\nreader\n[ˈrɪdər]\n4. 翻译结果只输出内容本身，不要任何前缀、标签、解释、注释或额外内容。";
+    public const string TranslationSystemPrompt = "你是一个专业翻译助手，只输出翻译结果，不聊天，用户是哑巴不会回应。\n规则：\n1. 用户输入英文时翻译为中文\n2. 用户输入中文时翻译为英文\n3. 中译英时，如果结果仅为一个英文单词（不是专有名词、不是复合词），换行追加美式音标。格式固定为：\n单词\n[ˈrɪdər]\n注意：单词本身不能省略！格式必须是两行，第一行是单词，第二行才是音标。\n4. 专有名词（如 TranslateSharp、CornerRadius）或复合词不要加音标。\n5. 翻译结果只输出内容本身，不要任何前缀、标签、解释、注释。";
 
     public const double TranslationTemperature = 0.3;
     public const int TranslationMaxTokens = 2000;
