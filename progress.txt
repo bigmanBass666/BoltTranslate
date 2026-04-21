@@ -167,3 +167,17 @@
   - 日志文件名：Bolt-{date}.log
   - 注册表项：TranslateSharp → Bolt
   - 编译 0 错误 0 警告，publish/Bolt.exe 运行正常
+
+## 2026-04-22
+
+### 已完成
+
+- **设置窗口 SettingsWindow**：
+  - 新增 Windows/SettingsWindow.xaml：现代化圆角设置界面（CornerRadius=8 + 阴影）
+  - 新增 Windows/SettingsWindow.xaml.cs：完整 code-behind 逻辑
+  - 控件：快捷键捕获输入框、API Key（PasswordBox + 显示/隐藏切换）、模型名称、代理地址、开机自启复选框
+  - 快捷键实时捕获：PreviewKeyDown 监听 Ctrl/Shift/Alt/Win 修饰键 + 主键，格式如 "Ctrl+Shift+T"
+  - API Key 眼睛图标切换 👁/🙈
+  - Esc 键关闭、保存/取消按钮（DialogResult 模式）
+  - LoadConfig()/SaveConfig() 与 ConfigManager 集成
+  - 编译 0 错误 0 警告
