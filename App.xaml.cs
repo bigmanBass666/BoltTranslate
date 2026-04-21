@@ -196,9 +196,9 @@ public partial class App : System.Windows.Application
         try
         {
             _windowManager.ShowPopupAtSelection("翻译中...", cursorX, cursorY);
-            var result = await _translationService.TranslateAsync(text);
-            TranslationLogger.Log(text, result);
-            _windowManager.ShowPopupAtSelection(result, cursorX, cursorY);
+            var details = await _translationService.TranslateWithDetailsAsync(text);
+            TranslationLogger.Log(text, details.TranslatedText, details.Prompt, details.RawResponse);
+            _windowManager.ShowPopupAtSelection(details.TranslatedText, cursorX, cursorY);
         }
         catch (TranslationException ex)
         {
