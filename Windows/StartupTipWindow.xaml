@@ -9,7 +9,7 @@
         Topmost="True"
         Width="160"
         Height="40">
-    <Border Background="#222222" CornerRadius="8" Padding="20,12">
+    <Border Background="#FFFFFFFF" CornerRadius="8" Padding="20,12">
         <Border.Triggers>
             <EventTrigger RoutedEvent="Window.Loaded">
                 <BeginStoryboard>
@@ -22,7 +22,7 @@
             </EventTrigger>
         </Border.Triggers>
         <TextBlock x:Name="TipText"
-                   Foreground="White"
+                   Foreground="#007ACC"
                    FontSize="16"
                    FontFamily="Segoe UI"
                    HorizontalAlignment="Center"

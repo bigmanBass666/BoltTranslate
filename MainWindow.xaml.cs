@@ -57,9 +57,7 @@ public partial class MainWindow : Window
             menu.Items.Add(statusItem);
             menu.Items.Add(new ToolStripSeparator());
 
-            menu.Items.Add(new ToolStripSeparator());
-
-        var settingsItem = new ToolStripMenuItem("设置", null, (_, _) => OpenSettings());
+            var settingsItem = new ToolStripMenuItem("设置", null, (_, _) => OpenSettings());
         menu.Items.Add(settingsItem);
 
         var restartItem = new ToolStripMenuItem("重启", null, (_, _) => RestartApplication());
