@@ -231,3 +231,10 @@
   - WindowManager 新增 ShowCenteredPopup() 方法
   - 启动时屏幕中央显示 "⚡ Bolt 已启动"，1.5秒后淡出消失
   - 带淡入（0.3秒）和淡出（0.3秒）动画效果
+
+## 2026-04-22 (续)
+
+### 已完成
+
+- **README 文档**：添加项目说明文档，包含功能特性、快速开始、项目结构、技术栈、构建说明
+- **发布 Release**：dotnet publish 生成 publish/Bolt.exe 独立可执行文件
