@@ -36,6 +36,7 @@ public partial class App : System.Windows.Application
             _mainWindow = new MainWindow(_config, _translationService!, _windowManager!, _selectionService!);
             AppLogger.Info("MainWindow created");
             _mainWindow.Show();
+            _windowManager!.ShowCenteredPopup("⚡ Bolt 已启动", 1500);
 
             if (!string.IsNullOrEmpty(_startupErrorMessage))
             {

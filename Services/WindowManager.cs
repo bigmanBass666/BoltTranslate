@@ -1,4 +1,4 @@
-﻿using System.Runtime.InteropServices;
+using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Interop;
 using BoltTranslate.Windows;
@@ -10,6 +10,7 @@ public interface IWindowManager
     void ShowPopup(string translatedText);
     void ShowPopup(string translatedText, double cursorX, double cursorY);
     void ShowPopupAtSelection(string translatedText, double cursorX, double cursorY);
+    void ShowCenteredPopup(string text, int durationMs = 2000);
     void HidePopup();
     bool IsVisible { get; }
 }
@@ -82,5 +83,12 @@ public class WindowManager : IWindowManager
     public void HidePopup()
     {
         _popup.Hide();
+    }
+
+    public void ShowCenteredPopup(string text, int durationMs = 2000)
+    {
+        var tip = new StartupTipWindow();
+        tip.SetText(text);
+        tip.ShowFor(durationMs);
     }
 }

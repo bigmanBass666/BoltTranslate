@@ -80,6 +80,10 @@ public partial class MainWindow : Window
 
     private static Icon CreateIcon()
     {
+        var iconPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "favicon.ico");
+        if (File.Exists(iconPath))
+            return new Icon(iconPath);
+
         using var bmp = new Bitmap(64, 64);
         using var g = Graphics.FromImage(bmp);
         g.Clear(Color.Transparent);
