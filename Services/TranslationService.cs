@@ -20,7 +20,7 @@ public class TranslationService : ITranslationService
 {
     private string? _apiUrl;
     private string? _apiKey;
-    private string _model = "gpt-4o-mini";
+    private string _model = "GLM-4-Flash-250414";
     private HttpClient? _client;
     private static readonly TimeSpan Timeout = TimeSpan.FromSeconds(AppConstants.TranslationTimeoutSeconds);
 
