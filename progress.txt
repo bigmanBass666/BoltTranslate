@@ -243,3 +243,9 @@
   - 问题：窗口失焦（包括 Alt+Tab、点击其他窗口）时，LostFocus 事件不可靠
   - 修复：添加 Window.Deactivated="OnWindowDeactivated" 事件处理
   - 失焦时立即停止捕捉快捷键，避免外部输入被错误捕获
+
+- **GitHub 首个 Release 发布**：
+  - 创建 MIT LICENSE 许可证文件
+  - 使用 gh release create v1.0.0 发布首个稳定版本
+  - 上传 Bolt.exe 到 Release 资产
+  - 地址：https://github.com/bigmanBass666/BoltTranslate/releases/tag/v1.0.0
