@@ -24,6 +24,8 @@ public class TranslationService : ITranslationService
     private HttpClient? _client;
     private static readonly TimeSpan Timeout = TimeSpan.FromSeconds(AppConstants.TranslationTimeoutSeconds);
 
+    private record TranslationResponse(string TranslatedText, string RawResponse);
+
     public bool IsConfigured => !string.IsNullOrEmpty(_apiUrl) && !string.IsNullOrEmpty(_apiKey);
 
     public void Configure(string apiUrl, string apiKey, string model, string proxyUrl = "")
@@ -67,11 +69,27 @@ public class TranslationService : ITranslationService
 
     public async Task<string> TranslateAsync(string text, CancellationToken ct = default)
     {
+        var response = await ExecuteTranslationAsync(text, ct);
+        return response.TranslatedText;
+    }
+
+    public async Task<TranslationResult> TranslateWithDetailsAsync(string text, CancellationToken ct = default)
+    {
+        var response = await ExecuteTranslationAsync(text, ct);
+        return new TranslationResult(
+            response.TranslatedText,
+            response.RawResponse,
+            AppConstants.TranslationSystemPrompt
+        );
+    }
+
+    private async Task<TranslationResponse> ExecuteTranslationAsync(string text, CancellationToken ct)
+    {
         if (!IsConfigured || _client == null)
             throw new InvalidOperationException("API 未配置，请先在 " + AppConstants.ConfigFileName + " 中设置 ApiUrl 和 ApiKey");
 
         if (string.IsNullOrWhiteSpace(text))
-            return "";
+            return new TranslationResponse("", "");
 
         var requestBody = new
         {
@@ -95,7 +113,6 @@ public class TranslationService : ITranslationService
         try
         {
             using var response = await _client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, ct);
-
             var responseBody = await response.Content.ReadAsStringAsync(ct);
 
             if (!response.IsSuccessStatusCode)
@@ -105,13 +122,14 @@ public class TranslationService : ITranslationService
             }
 
             using var doc = JsonDocument.Parse(responseBody);
-
-            return doc.RootElement
+            var translatedText = doc.RootElement
                 .GetProperty("choices")[0]
                 .GetProperty("message")
                 .GetProperty("content")
                 .GetString()
                 ?? "（翻译结果为空）";
+
+            return new TranslationResponse(translatedText, responseBody);
         }
         catch (HttpRequestException ex)
         {
@@ -129,54 +147,6 @@ public class TranslationService : ITranslationService
         {
             throw new TranslationException($"API 返回数据解析失败，可能是返回格式不兼容: {ex.Message}", ex);
         }
-    }
-
-    public async Task<TranslationResult> TranslateWithDetailsAsync(string text, CancellationToken ct = default)
-    {
-        if (!IsConfigured || _client == null)
-            throw new InvalidOperationException("API 未配置，请先在 " + AppConstants.ConfigFileName + " 中设置 ApiUrl 和 ApiKey");
-
-        if (string.IsNullOrWhiteSpace(text))
-            return new TranslationResult("", "", "");
-
-        var systemPrompt = AppConstants.TranslationSystemPrompt;
-        var requestBody = new
-        {
-            model = _model,
-            messages = new[]
-            {
-                new { role = "system", content = systemPrompt },
-                new { role = "user", content = text }
-            },
-            temperature = AppConstants.TranslationTemperature,
-            max_tokens = AppConstants.TranslationMaxTokens
-        };
-
-        var json = JsonSerializer.Serialize(requestBody);
-        using var request = new HttpRequestMessage(HttpMethod.Post, _apiUrl)
-        {
-            Content = new StringContent(json, Encoding.UTF8, "application/json")
-        };
-        request.Headers.Add("Authorization", $"Bearer {_apiKey}");
-
-        using var response = await _client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, ct);
-        var responseBody = await response.Content.ReadAsStringAsync(ct);
-
-        if (!response.IsSuccessStatusCode)
-        {
-            var errorMsg = ParseErrorResponse(responseBody, response.StatusCode);
-            throw new TranslationException($"API 错误 ({(int)response.StatusCode}): {errorMsg}");
-        }
-
-        using var doc = JsonDocument.Parse(responseBody);
-        var translatedText = doc.RootElement
-            .GetProperty("choices")[0]
-            .GetProperty("message")
-            .GetProperty("content")
-            .GetString()
-            ?? "（翻译结果为空）";
-
-        return new TranslationResult(translatedText, responseBody, systemPrompt);
     }
 
     private static string ParseErrorResponse(string body, HttpStatusCode statusCode)
