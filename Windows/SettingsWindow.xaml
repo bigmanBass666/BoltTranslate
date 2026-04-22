@@ -7,7 +7,8 @@
         WindowStyle="None"
         AllowsTransparency="True"
         Background="Transparent"
-        KeyDown="OnKeyDown">
+        KeyDown="OnKeyDown"
+        Deactivated="OnWindowDeactivated">
     <Border CornerRadius="8" Background="#FFFFFFFF" BorderBrush="#0D000000" BorderThickness="1">
         <Border.Effect>
             <DropShadowEffect BlurRadius="16" ShadowDepth="3" Opacity="0.15" Color="Black" Direction="270"/>

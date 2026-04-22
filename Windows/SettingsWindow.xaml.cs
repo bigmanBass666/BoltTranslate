@@ -67,6 +67,15 @@ public partial class SettingsWindow : Window
             HotkeyTextBox.Text = _hotkey;
     }
 
+    private void OnWindowDeactivated(object sender, EventArgs e)
+    {
+        _isCapturingHotkey = false;
+        if (string.IsNullOrEmpty(_hotkey))
+            HotkeyTextBox.Text = _config.Hotkey;
+        else
+            HotkeyTextBox.Text = _hotkey;
+    }
+
     private void OnHotkeyPreviewKeyDown(object sender, System.Windows.Input.KeyEventArgs e)
     {
         if (!_isCapturingHotkey) return;
