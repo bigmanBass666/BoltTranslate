@@ -1,28 +1,27 @@
 # BoltTranslate
 
-基于大模型 API 的划词翻译工具 — 极简、极速、高性能。
+基于大模型的划词翻译工具。
 
-## 特性
+## 功能特性
 
-- **划词翻译**：选中文字后按下快捷键，即可获得翻译结果
-- **智能双向翻译**：自动识别中英文，英文译中文，中文译英文
-- **音标标注**：单词翻译自动显示美式音标
-- **托盘运行**：后台运行，不打扰工作
-- **快捷键自定义**：支持配置个性化快捷键
+- **划词翻译**：选中文字后按快捷键即可翻译
+- **全局快捷键**：默认 `Ctrl+Shift+T`，支持自定义
+- **智能翻译**：自动识别中英文互译，英文单词显示美式音标
 - **代理支持**：可配置 HTTP 代理
+- **自动启动**：支持开机自启
+- **静默运行**：后台运行，不占任务栏
 
-## 开始使用
+## 快速开始
 
-### 前置要求
+### 1. 配置
 
-- Windows 10/11
-- .NET 8 Runtime（已内置，无需单独安装）
+复制配置文件：
 
-### 配置
+```
+copy Bolt.json.example Bolt.json
+```
 
-1. 从 [Releases](https://github.com/bigmanBass666/BoltTranslate/releases) 下载最新版本
-2. 运行 `Bolt.exe`
-3. 首次运行会自动打开配置文件，填入你的 API Key：
+编辑 `Bolt.json`：
 
 ```json
 {
@@ -35,60 +34,39 @@
 }
 ```
 
-### 支持的 API
-
-支持所有兼容 OpenAI 格式的 API 接口，例如：
-
-- 智谱 GLM-4（默认）
-- OpenAI GPT 系列
-- Claude（需自行配置 API 地址）
-- 本地模型（Ollama 等）
-
-### 快捷键
-
-| 快捷键 | 功能 |
-|--------|------|
-| `Ctrl+Shift+T` | 翻译选中文字（默认） |
-| `ESC` | 关闭悬浮窗 |
-
-## 项目结构
-
-```
-BoltTranslate/
-├── Config/              # 配置管理
-├── Services/            # 核心服务
-│   ├── NativeInterop/   # Win32 API 封装
-│   ├── TranslationService.cs   # 翻译服务
-│   ├── SelectionService.cs     # 选中文本获取
-│   ├── HotkeyService.cs        # 全局热键
-│   └── ClipboardService.cs     # 剪贴板操作
-├── Windows/              # WPF 窗口
-│   ├── MainWindow.xaml   # 主窗口
-│   ├── SettingsWindow.xaml  # 设置窗口
-│   └── TranslationPopup.xaml # 翻译悬浮窗
-└── App.xaml.cs          # 应用入口
-```
-
-## 技术栈
-
-- **.NET 8** + **WPF** + **Windows Forms**
-- **HttpClient** 连接大模型 API
-- **Win32 API** 实现全局热键、无窗口剪贴板读取
-- **UI Automation** 跨进程获取选中文字
-
-## 构建
+### 2. 运行
 
 ```bash
-dotnet build
 dotnet run
 ```
 
-发布独立可执行文件：
+### 3. 发布
+
+功能验证完成后，可发布独立 exe：
 
 ```bash
 dotnet publish -r win-x64 --self-contained true -o publish -p:PublishSingleFile=true
 ```
 
-## License
+## 项目结构
 
-MIT
+```
+BoltTranslate/
+├── Services/              # 核心服务
+│   ├── TranslationService.cs   # 翻译服务
+│   ├── HotkeyService.cs        # 快捷键服务
+│   ├── TextSelectionService.cs # 文本选择服务
+│   └── ClipboardService.cs     # 剪贴板服务
+├── Windows/                # 窗口
+│   ├── SettingsWindow.xaml     # 设置窗口
+│   └── TranslationPopup.xaml   # 翻译弹窗
+├── Config/
+│   └── AppConfig.cs       # 配置管理
+└── MainWindow.xaml        # 主窗口
+```
+
+## 技术栈
+
+- .NET 8.0 + WPF
+- HTTP API 调用
+- Win32 API (全局快捷键、窗口管理)
