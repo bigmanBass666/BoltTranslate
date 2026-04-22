@@ -215,3 +215,19 @@
   - 标题栏「配置文件」按钮从📄图标改为文字按钮样式（带边框）
   - 清理 MainWindow 中不再使用的 _autoStartMenuItem 字段和 ToggleAutoStart 方法
   - 编译 0 错误 0 警告
+
+### 2026-04-22
+
+### 已完成
+
+- **自定义图标**：
+  - 新增自定义 favicon.ico（闪电 B 图标）
+  - csproj 添加 ApplicationIcon=favicon.ico
+  - EXE 和托盘图标使用自定义图标
+  - 托盘图标代码优先加载 favicon.ico，不存在则回退到默认蓝色圆圈图标
+
+- **启动提示窗口**：
+  - 新增 Windows/StartupTipWindow.xaml/xaml.cs：无边框透明窗口，深灰圆角背景
+  - WindowManager 新增 ShowCenteredPopup() 方法
+  - 启动时屏幕中央显示 "⚡ Bolt 已启动"，1.5秒后淡出消失
+  - 带淡入（0.3秒）和淡出（0.3秒）动画效果
