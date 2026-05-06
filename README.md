@@ -1,6 +1,6 @@
 # BoltTranslate
 
-一款简洁高效的 Windows 翻译工具，选中文本后按下快捷键即可获得翻译结果。
+> 基于大模型 API 的划词翻译工具 — 极简、极速、高性能
 
 ## 功能特性
 
@@ -48,14 +48,14 @@ BoltTranslate/
 │   ├── NativeInterop/      # Win32 API 封装
 │   ├── SelectionService.cs # 选中文本服务
 │   ├── TranslationService.cs # 翻译 API 调用
-│   ├── HotkeyService.cs    # 全局热键管理
-│   └── ...
+│   └── HotkeyService.cs    # 全局热键管理
 ├── Windows/                # 窗口界面
 │   ├── TranslationPopup.xaml    # 翻译悬浮窗
 │   ├── SettingsWindow.xaml      # 设置窗口
 │   └── StartupTipWindow.xaml   # 启动提示
 ├── MainWindow.xaml         # 主窗口（托盘管理）
-└── App.xaml                # 应用入口
+├── App.xaml                # 应用入口
+└── Bolt.json.example       # 配置示例
 ```
 
 ## 技术栈
@@ -72,7 +72,7 @@ BoltTranslate/
 dotnet build
 dotnet run
 
-# 发布独立exe
+# 发布独立 exe
 dotnet publish -r win-x64 --self-contained true -o publish -p:PublishSingleFile=true
 ```
 
@@ -89,3 +89,11 @@ dotnet publish -r win-x64 --self-contained true -o publish -p:PublishSingleFile=
   "AutoStart": false
 }
 ```
+
+## 作者
+
+- **GitHub**: [bigmanBass666](https://github.com/bigmanBass666)
+
+---
+
+*Windows 桌面翻译工具，让翻译触手可及*
